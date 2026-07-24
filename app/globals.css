@@ -177,7 +177,7 @@ nav.main-nav a:hover, nav.main-nav a:focus-visible{
 .scroll-down-wrap{
   position:relative;z-index:2;
   display:flex;flex-direction:column;align-items:center;gap:10px;
-  margin:0px 0 79px;
+  margin:0px 0 40px;
   cursor:pointer;
 }
 .scroll-down-label{
