@@ -1,7 +1,5 @@
 # PickMyProducts.com — Next.js
 
-This is the restructured version of the original single-file `pickmyproducts.html` site, converted into a proper Next.js (App Router) project.
-
 ## What changed
 - **Structure**: one HTML file → pages/components (`app/page.js` + `components/*.jsx`)
 - **State**: global `let cart = []` and DOM manipulation → React state via `context/CartContext.js` and `context/ToastContext.js`
