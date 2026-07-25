@@ -1,5 +1,5 @@
 # PickMyProducts.com — Next.js
-
+-
 ## What changed
 - **Structure**: one HTML file → pages/components (`app/page.js` + `components/*.jsx`)
 - **State**: global `let cart = []` and DOM manipulation → React state via `context/CartContext.js` and `context/ToastContext.js`
