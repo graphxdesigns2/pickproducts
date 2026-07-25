@@ -1,17 +1,17 @@
-# PickMyProducts.com — Next.js
-
-## What changed
-- **Structure**: one HTML file → pages/components (`app/page.js` + `components/*.jsx`)
-- **State**: global `let cart = []` and DOM manipulation → React state via `context/CartContext.js` and `context/ToastContext.js`
-- **Styling**: the exact same design system, ported into `app/globals.css` (no visual changes)
-- **Data**: product catalog moved to `lib/products.js` — this is the file to eventually swap for real database calls
+# PickMyProducts.store — Next.js
 
 ## Run it locally
 ```
 npm install
 npm run dev
 ```
-Then open http://localhost:3000
+Then open 
+
+http://localhost:3000
+
+or
+
+http://10.0.0.24:3000
 
 ## Project layout
 ```
