@@ -1,6 +1,7 @@
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
+import PayPalProvider from "@/components/PayPalProvider";
 
 export const metadata = {
   title: "PickMyProducts",
@@ -18,9 +19,11 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <ToastProvider>
-          <CartProvider>{children}</CartProvider>
-        </ToastProvider>
+        <PayPalProvider>
+          <ToastProvider>
+            <CartProvider>{children}</CartProvider>
+          </ToastProvider>
+        </PayPalProvider>
       </body>
     </html>
   );
