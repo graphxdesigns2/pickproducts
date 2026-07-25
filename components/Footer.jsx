@@ -5,7 +5,7 @@ export default function Footer() {
         <div>
           <div className="logo" style={{ marginBottom: "12px" }}>
             <div className="mark">P</div>
-            <div className="word" style={{ color: "var(--white)" }}>PickMy<span>Products</span>.com</div>
+            <div className="word" style={{ color: "var(--white)" }}>PickMy<span>Products</span>.store</div>
           </div>
           <p style={{ fontSize: "12.5px", lineHeight: 1.6, maxWidth: "280px" }}>
             A curated dropshipping storefront connecting you to trending products from trusted suppliers worldwide.
@@ -25,7 +25,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        <span>© 2026 PickMyProducts.com — All rights reserved.</span>
+        <span>© 2026 PickMyProducts.store — All rights reserved.</span>
       </div>
     </footer>
   );

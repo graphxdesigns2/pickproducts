@@ -9,7 +9,7 @@ export default function Header({ search, onSearchChange, onOpenCart, onScrollToI
     <header>
       <div className="header-top-inner">
         <a className="logo" href="#home">
-          <div className="word">PickMy<span>Products</span>.com</div>
+          <div className="word">PickMy<span>Products</span>.store</div>
         </a>
         <div className="search-wrap">
           <input
