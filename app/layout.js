@@ -3,7 +3,7 @@ import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 
 export const metadata = {
-  title: "PickMyProducts.com — Find it. Pick it. Get it.",
+  title: "PickMyProducts",
   description: "A curated dropshipping storefront connecting you to trending products from trusted suppliers worldwide.",
 };
 
