@@ -3,7 +3,11 @@ export default function ProductCard({ product, onOpen, onQuickAdd }) {
   return (
     <div className="card" onClick={() => onOpen(p.id)}>
       <div className="card-media">
-        {p.icon}
+        {p.img ? (
+          <img src={p.img} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          p.icon
+        )}
         {p.was ? <div className="badge">SALE</div> : null}
       </div>
       <div className="card-body">
