@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import Header from "@/components/Header";
@@ -14,22 +14,28 @@ import { useSearchParams } from "next/navigation";
 const FIXED_CATEGORIES = [];
 
 export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="products-loading">Loading...</div>}>
+      <ProductsPageContent />
+    </Suspense>
+  );
+}
+
+function ProductsPageContent() {
   const { addToCart } = useCart();
   const { showToast } = useToast();
-
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
-
   const [activeCategories, setActiveCategories] = useState([]);
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sortBy, setSortBy] = useState("featured");
-
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [productModalId, setProductModalId] = useState(null);
+  // ... rest of your existing code continues unchanged here ...
 
   useEffect(() => {
     fetch("/api/products?limit=100&depth=1")
