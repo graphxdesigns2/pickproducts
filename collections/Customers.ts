@@ -13,7 +13,7 @@ export const Customers: CollectionConfig = {
         return true
       }
       // Customers can only read their own record
-      if (req.user && req.user.collection === 'customers') {
+      if (req.user && (req.user.collection as string) === 'customers') {
         return { id: { equals: req.user.id } }
       }
       return false
@@ -23,7 +23,7 @@ export const Customers: CollectionConfig = {
       if (req.user && req.user.collection === 'users') {
         return true
       }
-      if (req.user && req.user.collection === 'customers') {
+      if (req.user && (req.user.collection as string) === 'customers') {
         return { id: { equals: req.user.id } }
       }
       return false
