@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Marquee from "@/components/Marquee";
+import Link from "next/link";
 
 export default function Hero({ onSmoothScrollTo }) {
   const canvasRef = useRef(null);
@@ -144,19 +145,20 @@ export default function Hero({ onSmoothScrollTo }) {
         <h1>Products you're<br />looking for, <em>in one stop.</em></h1>
         <p>A fast draw means nothing if the aim is wrong. Dust settles on the living and the dead alike.</p>
         <div className="hero-cta">
-          <button className="btn btn-gold btn-glow" onClick={() => onSmoothScrollTo("shop", 900)}>
-            <div className="dots_border"></div>
-            <div className="btn-shine"></div>
-            <span className="btn-label">Shop the Catalog</span>
-            <svg className="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14" />
-              <path d="M13 6l6 6-6 6" />
-            </svg>
-          </button>
-          <button className="btn btn-ghost" onClick={() => document.getElementById("support")?.scrollIntoView({ behavior: "smooth" })}>
-            New items
-          </button>
-        </div>
+  <Link href="/products" className="btn btn-gold btn-glow">
+    <div className="dots_border"></div>
+    <div className="btn-shine"></div>
+    <span className="btn-label">Shop the Catalog</span>
+    <svg className="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14" />
+      <path d="M13 6l6 6-6 6" />
+    </svg>
+  </Link>
+
+  <button className="btn btn-ghost" onClick={() => document.getElementById("support")?.scrollIntoView({ behavior: "smooth" })}>
+    New items
+  </button>
+</div>
         <div className="stat-row">
           <div className="stat-card"><div><div className="label">Text here</div><div className="value">Bolded text here</div></div></div>
           <div className="stat-card"><div><div className="label">Text here</div><div className="value">Bolded text here</div></div></div>

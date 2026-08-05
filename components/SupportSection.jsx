@@ -2,7 +2,7 @@ const FAQS = [
   { cat: "Shipping", q: "How long does delivery take?", a: "Most orders arrive in 7–14 business days as they ship directly from our supplier network." },
   { cat: "Returns", q: "What's the return policy?", a: "30 days from delivery for unused items in original packaging. Refunds to original payment method." },
   { cat: "Payments", q: "Is checkout secure?", a: "Yes — all payment data is encrypted in transit and never stored on our servers." },
-  { cat: "Contact", q: "Need to reach a human?", a: "Email support@pickmyproducts.store or use live chat, 7 days a week, 8am–10pm ET." },
+  { cat: "Contact", q: "Need to reach a human?", a: "Email support@pickmyproducts.com or use live chat, 7 days a week, 8am–10pm ET." },
 ];
 
 export default function SupportSection() {

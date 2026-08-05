@@ -1,5 +1,4 @@
 "use client";
-
 import { useCart } from "@/context/CartContext";
 import { getCartTotals } from "@/lib/pricing";
 
@@ -20,11 +19,11 @@ export default function CartDrawer({ isOpen, onClose, onCheckout }) {
             <div className="cart-empty">Your cart is empty.<br />Browse the catalog to find something you'll love.</div>
           ) : (
             cart.map((c, idx) => (
-              <div className="cart-item" key={c.id + "|" + (c.size || "") }>
+              <div className="cart-item" key={c.id + "|" + (c.size || "")}>
                 <div className="thumb">{c.icon}</div>
                 <div className="info">
                   <div className="name">{c.name}</div>
-                  <div className="meta">{c.size ? `Size: ${c.size}` : "One size"}</div>
+                  {c.size && <div className="meta">Size: {c.size}</div>}
                   <div className="qty-ctrl">
                     <button onClick={() => changeQty(idx, -1)}>−</button>
                     <span className="n">{c.qty}</span>

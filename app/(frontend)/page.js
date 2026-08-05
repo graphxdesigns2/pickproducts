@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { PRODUCTS, getProductById } from "@/lib/products";
+import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 
@@ -44,6 +43,7 @@ export default function Home() {
   const { addToCart } = useCart();
   const { showToast } = useToast();
 
+  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
@@ -51,15 +51,27 @@ export default function Home() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [productModalId, setProductModalId] = useState(null);
 
+useEffect(() => {
+  fetch("/api/products?limit=100&depth=1&where[trending][equals]=true")
+    .then((res) => res.json())
+    .then((data) => setProducts(data.docs || []))
+    .catch((err) => console.error("Failed to load products:", err));
+}, []);
+
+  function getProductById(id) {
+    return products.find((p) => p.id === id);
+  }
+
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    let items = PRODUCTS.filter(p => activeCategory === "All" || p.cat === activeCategory);
+    let items = products.filter(p => activeCategory === "All" || p.cat === activeCategory);
     if (q) items = items.filter(p => p.name.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q));
     return items;
-  }, [search, activeCategory]);
+  }, [search, activeCategory, products]);
 
   function quickAdd(id) {
     const p = getProductById(id);
+    if (!p) return;
     addToCart(p, p.sizes ? p.sizes[0] : null, 1);
     showToast(`Added ${p.name} to cart`);
   }
@@ -82,9 +94,11 @@ export default function Home() {
   return (
     <>
       <div className="utility-bar">
+	  <span className="dot"></span>
         <span>Free shipping over $50</span><span className="dot"></span>
         <span>24 hour responses</span><span className="dot"></span>
-        <span>Secure checkout, 256-bit encryption</span>
+        <span>Secure checkout with Paypal / Google Pay / Apple Pay</span>
+		<span className="dot"></span>
       </div>
 
       <Header
