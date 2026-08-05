@@ -17,11 +17,12 @@ const dirname = path.dirname(filename);
 
 export default buildConfig({
   admin: {
-    user: Users.slug,
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
+  user: Users.slug,
+  importMap: {
+    baseDir: path.resolve(dirname),
+    autoGenerate: true,
   },
+},
   collections: [Users, Media, Products, Customers, Categories],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
