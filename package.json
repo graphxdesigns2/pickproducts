@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.87.0",
-    "@payloadcms/next": "^3.86.0",
+    "@payloadcms/graphql": "^3.87.0",
+    "@payloadcms/next": "^3.87.0",
     "@payloadcms/richtext-lexical": "^3.87.0",
     "@payloadcms/storage-vercel-blob": "^3.87.0",
+    "@payloadcms/ui": "^3.87.0",
     "@paypal/react-paypal-js": "^10.1.2",
     "@vercel/blob": "^2.6.1",
     "graphql": "^16.14.2",
@@ -22,7 +24,9 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@types/react": "19.2.18",
     "eslint": "^9",
-    "eslint-config-next": "16.2.10"
+    "eslint-config-next": "16.2.10",
+    "typescript": "7.0.2"
   }
-} 
+}
