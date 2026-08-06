@@ -417,7 +417,7 @@ nav.main-nav a:hover, nav.main-nav a:focus-visible{
 }
 .marquee-track{
   display:flex;gap:14px;width:max-content;
-  animation:scroll-left 3s linear infinite;
+  animation:scroll-left 30s linear infinite;
 }
 .marquee-wrap:hover .marquee-track{animation-play-state:paused;}
 @keyframes scroll-left{
@@ -425,9 +425,15 @@ nav.main-nav a:hover, nav.main-nav a:focus-visible{
   to{transform:translateX(-50%);}
 }
 .chip-product{
-  flex-shrink:0;display:flex;align-items:center;gap:10px;
-  background:var(--surface-alt);border:1px solid var(--border);
-  border-radius:12px;padding:10px 16px 10px 12px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:var(--surface-alt);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 16px 10px 12px;
+  width: 100px;
 }
 .chip-product .ci{
   width:30px;height:30px;border-radius:8px;background:var(--surface);
