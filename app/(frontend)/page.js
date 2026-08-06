@@ -62,12 +62,12 @@ useEffect(() => {
     return products.find((p) => p.id === id);
   }
 
-  const filteredProducts = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    let items = products.filter(p => activeCategory === "All" || p.cat === activeCategory);
-    if (q) items = items.filter(p => p.name.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q));
-    return items;
-  }, [search, activeCategory, products]);
+const filteredProducts = useMemo(() => {
+  const q = search.trim().toLowerCase();
+  let items = products.filter(p => activeCategory === "All" || p.cat?.name === activeCategory);
+  if (q) items = items.filter(p => p.name.toLowerCase().includes(q) || p.cat?.name?.toLowerCase().includes(q));
+  return items;
+}, [search, activeCategory, products]);
 
   function quickAdd(id) {
     const p = getProductById(id);
