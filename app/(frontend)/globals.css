@@ -433,11 +433,16 @@ nav.main-nav a:hover, nav.main-nav a:focus-visible{
   border:1px solid var(--border);
   border-radius:12px;
   padding:10px 16px 10px 12px;
-  width: 100px;
+  width: 260px;
 }
 .chip-product .ci{
   width:30px;height:30px;border-radius:8px;background:var(--surface);
   display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;
+}
+.cn {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .chip-product .cn{font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;}
 .chip-product .cp{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--gold-600);margin-left:2px;}
