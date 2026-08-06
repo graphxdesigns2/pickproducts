@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export default function Carousel() {
+export default function Carousel({ onOpen }) {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -13,13 +13,19 @@ export default function Carousel() {
 
   if (products.length === 0) return null;
 
-  const list = [...products, ...products, ...products, ...products];
+  // duplicate the list once for a seamless infinite scroll loop
+  const list = [...products, ...products];
 
   return (
     <div className="marquee-wrap">
       <div className="marquee-track" id="marqueeTrack">
         {list.map((p, i) => (
-          <div className="chip-product" key={p.id + "-" + i}>
+          <div
+            className="chip-product"
+            key={p.id + "-" + i}
+            onClick={() => onOpen && onOpen(p.id)}
+            style={{ cursor: "pointer" }}
+          >
             <div className="ci">
               {p.image?.url ? (
                 <img src={p.image.url} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />

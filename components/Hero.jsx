@@ -171,7 +171,6 @@ export default function Hero({ onSmoothScrollTo }) {
           </button>
         </div>
       </div>
-      <Carousel />
     </section>
   );
 }

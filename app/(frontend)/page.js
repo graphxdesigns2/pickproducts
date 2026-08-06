@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import ProductModal from "@/components/ProductModal";
 import CheckoutModal from "@/components/CheckoutModal";
+import Carousel from "@/components/Carousel";
 
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -52,7 +53,7 @@ export default function Home() {
   const [productModalId, setProductModalId] = useState(null);
 
 useEffect(() => {
-  fetch("/api/products?limit=100&depth=1&where[trending][equals]=true")
+  fetch("/api/products?limit=100&depth=1")
     .then((res) => res.json())
     .then((data) => setProducts(data.docs || []))
     .catch((err) => console.error("Failed to load products:", err));
@@ -64,7 +65,8 @@ useEffect(() => {
 
 const filteredProducts = useMemo(() => {
   const q = search.trim().toLowerCase();
-  let items = products.filter(p => activeCategory === "All" || p.cat?.name === activeCategory);
+  let items = products.filter(p => p.trending);
+  items = items.filter(p => activeCategory === "All" || p.cat?.name === activeCategory);
   if (q) items = items.filter(p => p.name.toLowerCase().includes(q) || p.cat?.name?.toLowerCase().includes(q));
   return items;
 }, [search, activeCategory, products]);
@@ -109,7 +111,7 @@ const filteredProducts = useMemo(() => {
       />
 
       <Hero onSmoothScrollTo={smoothScrollTo} />
-
+	  <Carousel onOpen={setProductModalId} />
       <CategoryRail activeCategory={activeCategory} onSelect={setActiveCategory} />
 
       <main className="section" id="shop">
