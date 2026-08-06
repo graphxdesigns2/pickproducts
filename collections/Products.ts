@@ -42,7 +42,13 @@ export const Products: CollectionConfig = {
 	  type: 'checkbox',
 	  label: 'Show on homepage (Trending)',
 	  defaultValue: false,
-},
+	},
+	{
+	  name: 'carousel',
+	  type: 'checkbox',
+	  label: 'Show on rotating product wheel',
+	  defaultValue: false,
+	},
    {
   name: 'sizes',
   type: 'array',

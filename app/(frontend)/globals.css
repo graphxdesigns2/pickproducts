@@ -417,7 +417,7 @@ nav.main-nav a:hover, nav.main-nav a:focus-visible{
 }
 .marquee-track{
   display:flex;gap:14px;width:max-content;
-  animation:scroll-left 38s linear infinite;
+  animation:scroll-left 3s linear infinite;
 }
 .marquee-wrap:hover .marquee-track{animation-play-state:paused;}
 @keyframes scroll-left{

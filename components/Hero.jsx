@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Marquee from "@/components/Marquee";
+import Carousel from "@/components/Carousel";
 import Link from "next/link";
 
 export default function Hero({ onSmoothScrollTo }) {
@@ -171,7 +171,7 @@ export default function Hero({ onSmoothScrollTo }) {
           </button>
         </div>
       </div>
-      <Marquee />
+      <Carousel />
     </section>
   );
 }
