@@ -13,28 +13,40 @@ export default function Carousel({ onOpen }) {
 
   if (products.length === 0) return null;
 
-  // duplicate the list once for a seamless infinite scroll loop
-  const list = [...products, ...products];
+  // If items are too few to fill screen, tile them until we have at least 10 items per group
+  const minItemsPerGroup = 10;
+  const multiplier = Math.ceil(minItemsPerGroup / products.length);
+  const filledProducts = Array(multiplier).fill(products).flat();
 
   return (
     <div className="marquee-wrap">
       <div className="marquee-track" id="marqueeTrack">
-        {list.map((p, i) => (
-          <div
-            className="chip-product"
-            key={p.id + "-" + i}
-            onClick={() => onOpen && onOpen(p.id)}
-            style={{ cursor: "pointer" }}
-          >
-            <div className="ci">
-              {p.image?.url ? (
-                <img src={p.image.url} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                p.icon
-              )}
-            </div>
-            <div className="cn">{p.name}</div>
-            <div className="cp">${p.price.toFixed(2)}</div>
+        {[0, 1].map((groupIndex) => (
+          <div key={groupIndex} className="marquee-group">
+            {filledProducts.map((p, i) => (
+              <div
+                className="chip-product"
+                key={`${p.id}-${groupIndex}-${i}`}
+                onClick={() => onOpen && onOpen(p.id)}
+                style={{ cursor: "pointer" }}
+              >
+                <div className="ci">
+                  {p.image?.url ? (
+                    <img
+                      src={p.image.url}
+                      alt={p.name}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    p.icon
+                  )}
+                </div>
+                <div className="cn">{p.name}</div>
+                <div className="cp">
+                  ${typeof p.price === "number" ? p.price.toFixed(2) : "0.00"}
+                </div>
+              </div>
+            ))}
           </div>
         ))}
       </div>
