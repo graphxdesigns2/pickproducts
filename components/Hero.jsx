@@ -16,8 +16,8 @@ export default function Hero({ onSmoothScrollTo }) {
 
     let particlesArray = [];
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const getParticleCount = (w, h) => Math.min(70, Math.floor((w * h) / 9000));
-    const mouse = { x: null, y: null, radius: 110 };
+    const getParticleCount = (w, h) => Math.min(65, Math.floor((w * h) / 10000));
+    const mouse = { x: null, y: null, radius: 80 };
     let dims = { w: 0, h: 0 };
     let rafId;
 
@@ -159,11 +159,7 @@ export default function Hero({ onSmoothScrollTo }) {
     New items
   </button>
 </div>
-        <div className="stat-row">
-          <div className="stat-card"><div><div className="label">Text here</div><div className="value">Bolded text here</div></div></div>
-          <div className="stat-card"><div><div className="label">Text here</div><div className="value">Bolded text here</div></div></div>
-          <div className="stat-card"><div><div className="label">Text here</div><div className="value">Bolded text here</div></div></div>
-        </div>
+       
         <div className="scroll-down-wrap" onClick={() => onSmoothScrollTo("marqueeTrack", 900)}>
           <div className="scroll-down-label">Scroll</div>
           <button className="scroll-down" aria-label="Scroll down">

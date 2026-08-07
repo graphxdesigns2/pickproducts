@@ -1,24 +1,29 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useCustomer } from "@/context/CustomerContext";
-
 export default function Header({ search, onSearchChange, onOpenCart, onScrollToId }) {
   const { cartCount } = useCart();
   const { customer } = useCustomer();
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function handleSearchKeyDown(e) {
     if (e.key === "Enter" && search.trim()) {
       router.push(`/products?search=${encodeURIComponent(search.trim())}`);
+      setMobileMenuOpen(false);
     }
+  }
+
+  function closeMobileMenu() {
+    setMobileMenuOpen(false);
   }
 
   return (
     <header>
       <div className="header-top-inner">
-        {/* Changed from <a href="#home"> to <Link href="/"> */}
         <Link className="logo" href="/">
           <div className="word">PickMy<span>Products</span>.com</div>
         </Link>
@@ -37,13 +42,6 @@ export default function Header({ search, onSearchChange, onOpenCart, onScrollToI
           </svg>
         </div>
         <div className="header-actions">
-          <button className="icon-btn" onClick={() => onScrollToId("support")}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4" />
-              <path d="M12 17h.01" />
-            </svg>
-          </button>
           <div className="account-link-wrap">
             <Link
               href="/login"
@@ -72,11 +70,30 @@ export default function Header({ search, onSearchChange, onOpenCart, onScrollToI
               {cartCount > 99 ? "99+" : cartCount}
             </span>
           </button>
+          <button
+            className="hamburger-btn"
+            aria-label="Toggle menu"
+            onClick={() => setMobileMenuOpen((v) => !v)}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {mobileMenuOpen ? (
+                <>
+                  <path d="M18 6L6 18" />
+                  <path d="M6 6l12 12" />
+                </>
+              ) : (
+                <>
+                  <path d="M3 6h18" />
+                  <path d="M3 12h18" />
+                  <path d="M3 18h18" />
+                </>
+              )}
+            </svg>
+          </button>
         </div>
       </div>
       <div className="header-nav-row">
         <nav className="main-nav">
-          {/* Changed from <a href="#home"> to <Link href="/"> */}
           <Link href="/">Home</Link>
           <Link href="/products">Products</Link>
           <Link href="/#shop">Shop</Link>
@@ -84,6 +101,32 @@ export default function Header({ search, onSearchChange, onOpenCart, onScrollToI
           <Link href="/#about">About</Link>
         </nav>
       </div>
+
+      <div
+  className={`mobile-menu-overlay${mobileMenuOpen ? " open" : ""}`}
+  onClick={closeMobileMenu}
+></div>
+<div className={`mobile-menu${mobileMenuOpen ? " open" : ""}`}>
+  <div className="mobile-menu-head">
+    <div className="word">PickMy<span>Products</span>.com</div>
+    <button className="mobile-menu-close" onClick={closeMobileMenu} aria-label="Close menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M18 6L6 18" />
+        <path d="M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+  <nav className="mobile-nav">
+    <Link href="/" onClick={closeMobileMenu}>Home</Link>
+    <Link href="/products" onClick={closeMobileMenu}>Products</Link>
+    <Link href="/#shop" onClick={closeMobileMenu}>Shop</Link>
+    <Link href="/#support" onClick={closeMobileMenu}>Support</Link>
+    <Link href="/#about" onClick={closeMobileMenu}>About</Link>
+    <Link href="/login" onClick={closeMobileMenu}>
+      {customer ? "Account" : "Log in"}
+    </Link>
+  </nav>
+</div>
     </header>
   );
 }
