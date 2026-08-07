@@ -1161,6 +1161,47 @@ nav.main-nav a:hover, nav.main-nav a:focus-visible{
   text-decoration: underline;
 }
 
+.auth-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px;
+  background: #fff;
+  border: 1px solid var(--border, #e4e6ec);
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #14151a;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  margin-bottom: 16px;
+}
+
+.auth-google-btn:hover {
+  background: #f7f7f8;
+}
+
+.auth-divider {
+  text-align: center;
+  color: #9aa3b5;
+  font-size: 12px;
+  margin: 16px 0;
+  position: relative;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: var(--border, #e4e6ec);
+}
+.auth-divider::before { left: 0; }
+.auth-divider::after { right: 0; }
+
 /* ===== FOOTER ===== */
 footer{background:var(--navy-950);color:#8b96ad;padding:52px 24px 26px;}
 .footer-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px;}
