@@ -17,6 +17,7 @@
     "@payloadcms/ui": "^3.87.0",
     "@paypal/react-paypal-js": "^10.1.2",
     "@vercel/blob": "^2.6.1",
+    "google-auth-library": "^10.9.1",
     "graphql": "^16.14.2",
     "next": "16.2.10",
     "payload": "^3.87.0",
