@@ -1202,6 +1202,144 @@ nav.main-nav a:hover, nav.main-nav a:focus-visible{
 .auth-divider::before { left: 0; }
 .auth-divider::after { right: 0; }
 
+.account-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.account-loading {
+  text-align: center;
+  padding: 80px 20px;
+  color: #9aa3b5;
+}
+
+.account-header {
+  margin-bottom: 32px;
+}
+
+.account-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--text, #14151a);
+}
+
+.account-header p {
+  color: #9aa3b5;
+  font-size: 14px;
+  margin: 0;
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 700px) {
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.account-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e4e6ec);
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.account-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.account-card-head h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text, #14151a);
+}
+
+.account-edit-btn {
+  background: transparent;
+  border: 1px solid var(--border, #e4e6ec);
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gold-600, #b8860b);
+  cursor: pointer;
+}
+
+.account-field {
+  margin-bottom: 18px;
+}
+
+.account-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9aa3b5;
+  margin-bottom: 6px;
+}
+
+.account-field-value {
+  font-size: 15px;
+  color: var(--text, #14151a);
+}
+
+.account-edit-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.account-edit-row input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid var(--border, #e4e6ec);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.account-cancel-btn {
+  background: transparent;
+  border: none;
+  color: #9aa3b5;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.account-logout-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 11px;
+  background: transparent;
+  border: 1px solid var(--border, #e4e6ec);
+  border-radius: 9px;
+  color: #c0392b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.account-logout-btn:hover {
+  background: rgba(192, 57, 43, 0.06);
+}
+
+.account-empty-state {
+  text-align: center;
+  padding: 32px 12px;
+  color: #9aa3b5;
+  font-size: 14px;
+}
+
 /* ===== FOOTER ===== */
 footer{background:var(--navy-950);color:#8b96ad;padding:52px 24px 26px;}
 .footer-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px;}
