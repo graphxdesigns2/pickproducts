@@ -143,7 +143,7 @@ export default function Hero({ onSmoothScrollTo }) {
       <div className="hero-content">
         <div className="eyebrow">★ New products weekly ★</div>
         <h1>Products you're<br />looking for, <em>in one stop.</em></h1>
-        <p>A fast draw means nothing if the aim is wrong. Dust settles on the living and the dead alike.</p>
+        <p>We are expanding our warehouse everyday to bring new products to you.</p>
         <div className="hero-cta">
   <Link href="/products" className="btn btn-gold btn-glow">
     <div className="dots_border"></div>
