@@ -4,11 +4,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useCustomer } from "@/context/CustomerContext";
-export default function Header({ search, onSearchChange, onOpenCart, onScrollToId }) {
-  const { cartCount } = useCart();
-  const { customer } = useCustomer();
+
+export default function Header({ search, onSearchChange, onOpenCart, onScrollToId, cartCount: propCartCount }) {
+  const { cart, cartCount: contextCartCount } = useCart() || {};
+  const { customer } = useCustomer() || {};
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const totalItems =
+    typeof propCartCount === "number"
+      ? propCartCount
+      : typeof contextCartCount === "number"
+      ? contextCartCount
+      : Array.isArray(cart)
+      ? cart.reduce((sum, item) => sum + (Number(item.qty) || 1), 0)
+      : 0;
 
   function handleSearchKeyDown(e) {
     if (e.key === "Enter" && search.trim()) {
@@ -44,10 +54,10 @@ export default function Header({ search, onSearchChange, onOpenCart, onScrollToI
         <div className="header-actions">
           <div className="account-link-wrap">
             <Link
-  href={customer ? "/account" : "/login"}
-  className="icon-btn"
-  aria-label={customer ? "Account" : "Log in"}
->
+              href={customer ? "/account" : "/login"}
+              className="icon-btn"
+              aria-label={customer ? "Account" : "Log in"}
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
@@ -66,9 +76,11 @@ export default function Header({ search, onSearchChange, onOpenCart, onScrollToI
               </div>
               <div className="cart-text">Cart</div>
             </div>
-            <span className="cart-count" style={{ display: cartCount > 0 ? "flex" : "none" }}>
-              {cartCount > 99 ? "99+" : cartCount}
-            </span>
+            {totalItems > 0 && (
+              <span className="cart-count">
+                {totalItems > 99 ? "99+" : totalItems}
+              </span>
+            )}
           </button>
           <button
             className="hamburger-btn"
@@ -103,30 +115,30 @@ export default function Header({ search, onSearchChange, onOpenCart, onScrollToI
       </div>
 
       <div
-  className={`mobile-menu-overlay${mobileMenuOpen ? " open" : ""}`}
-  onClick={closeMobileMenu}
-></div>
-<div className={`mobile-menu${mobileMenuOpen ? " open" : ""}`}>
-  <div className="mobile-menu-head">
-    <div className="word">PickMy<span>Products</span>.com</div>
-    <button className="mobile-menu-close" onClick={closeMobileMenu} aria-label="Close menu">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M18 6L6 18" />
-        <path d="M6 6l12 12" />
-      </svg>
-    </button>
-  </div>
-  <nav className="mobile-nav">
-    <Link href="/" onClick={closeMobileMenu}>Home</Link>
-    <Link href="/products" onClick={closeMobileMenu}>Products</Link>
-    <Link href="/#shop" onClick={closeMobileMenu}>Shop</Link>
-    <Link href="/#support" onClick={closeMobileMenu}>Support</Link>
-    <Link href="/#about" onClick={closeMobileMenu}>About</Link>
-    <Link href="/login" onClick={closeMobileMenu}>
-      {customer ? "Account" : "Log in"}
-    </Link>
-  </nav>
-</div>
+        className={`mobile-menu-overlay${mobileMenuOpen ? " open" : ""}`}
+        onClick={closeMobileMenu}
+      ></div>
+      <div className={`mobile-menu${mobileMenuOpen ? " open" : ""}`}>
+        <div className="mobile-menu-head">
+          <div className="word">PickMy<span>Products</span>.com</div>
+          <button className="mobile-menu-close" onClick={closeMobileMenu} aria-label="Close menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18" />
+              <path d="M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <nav className="mobile-nav">
+          <Link href="/" onClick={closeMobileMenu}>Home</Link>
+          <Link href="/products" onClick={closeMobileMenu}>Products</Link>
+          <Link href="/#shop" onClick={closeMobileMenu}>Shop</Link>
+          <Link href="/#support" onClick={closeMobileMenu}>Support</Link>
+          <Link href="/#about" onClick={closeMobileMenu}>About</Link>
+          <Link href="/login" onClick={closeMobileMenu}>
+            {customer ? "Account" : "Log in"}
+          </Link>
+        </nav>
+      </div>
     </header>
   );
 }

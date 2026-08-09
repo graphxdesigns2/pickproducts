@@ -1584,6 +1584,7 @@ nav.main-nav a:hover, nav.main-nav a:focus-visible{
   }
 }
 
+
 /* ===== FOOTER ===== */
 footer{background:var(--navy-950);color:#8b96ad;padding:52px 24px 26px;}
 .footer-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px;}
