@@ -71,12 +71,27 @@ const filteredProducts = useMemo(() => {
   return items;
 }, [search, activeCategory, products]);
 
-  function quickAdd(id) {
-    const p = getProductById(id);
-    if (!p) return;
-    addToCart(p, p.sizes ? p.sizes[0] : null, 1);
-    showToast(`Added ${p.name} to cart`);
-  }
+function quickAdd(id) {
+  const p = getProductById(id);
+  if (!p) return;
+
+  // Extract the image URL from Payload CMS structure
+  const imageUrl =
+    p.image?.url ||
+    p.images?.[0]?.image?.url ||
+    p.images?.[0]?.url ||
+    p.featuredImage?.url ||
+    (typeof p.image === "string" ? p.image : null);
+
+  const productToCart = {
+    ...p,
+    name: p.name || p.title,
+    image: imageUrl, // Guarantees a valid image URL string is attached
+  };
+
+  addToCart(productToCart, p.sizes ? p.sizes[0] : null, 1);
+  showToast(`Added ${p.name || p.title} to cart`);
+}
 
   function openCart() {
     setCartOpen(true);
