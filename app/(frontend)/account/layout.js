@@ -1,5 +1,7 @@
 'use client';
 
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCustomer } from '@/context/CustomerContext';
@@ -53,55 +55,63 @@ export default function AccountLayout({ children }) {
 
   if (loading || !customer) {
     return (
-      <div className="account-container">
-        <p style={{ padding: '40px', color: '#9aa3b5' }}>Loading...</p>
-      </div>
+      <>
+        <Header />
+        <div className="account-container">
+          <p style={{ padding: '40px', color: '#9aa3b5' }}>Loading...</p>
+        </div>
+        <Footer />
+      </>
     );
   }
 
   return (
-    <div className="account-container">
-      <aside className="account-sidebar">
-        <div className="user-badge">
-          <div className="user-info">
-            <span className="user-name">
-              {[customer.firstName, customer.lastName].filter(Boolean).join(' ') ||
-                customer.name ||
-                'My Account'}
-            </span>
-            <span className="user-email">{customer.email}</span>
+    <>
+      <Header />
+      <div className="account-container">
+        <aside className="account-sidebar">
+          <div className="user-badge">
+            <div className="user-info">
+              <span className="user-name">
+                {[customer.firstName, customer.lastName].filter(Boolean).join(' ') ||
+                  customer.name ||
+                  'My Account'}
+              </span>
+              <span className="user-email">{customer.email}</span>
+            </div>
           </div>
-        </div>
-        <nav className="account-nav">
-          {NAV_STRUCTURE.map((tab) => {
-            const isActive = pathname === tab.href;
-            return (
-              <div className="nav-group" key={tab.href}>
-                <a
-                  href={tab.href}
-                  className={`nav-tab${isActive ? ' active' : ''}`}
-                >
-                  {tab.label}
-                </a>
-                {isActive && tab.subItems.length > 0 && (
-                  <div className="nav-subitems">
-                    {tab.subItems.map((sub) => (
-                      <a href={sub.href} className="nav-subitem" key={sub.href}>
-                        {sub.label}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          <a href="#logout" className="nav-item logout" onClick={handleLogout}>
-            Logout
-          </a>
-        </nav>
-      </aside>
+          <nav className="account-nav">
+            {NAV_STRUCTURE.map((tab) => {
+              const isActive = pathname === tab.href;
+              return (
+                <div className="nav-group" key={tab.href}>
+                  <a
+                    href={tab.href}
+                    className={`nav-tab${isActive ? ' active' : ''}`}
+                  >
+                    {tab.label}
+                  </a>
+                  {isActive && tab.subItems.length > 0 && (
+                    <div className="nav-subitems">
+                      {tab.subItems.map((sub) => (
+                        <a href={sub.href} className="nav-subitem" key={sub.href}>
+                          {sub.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <a href="#logout" className="nav-item logout" onClick={handleLogout}>
+              Logout
+            </a>
+          </nav>
+        </aside>
 
-      <main className="account-content">{children}</main>
-    </div>
+        <main className="account-content">{children}</main>
+      </div>
+      <Footer />
+    </>
   );
 }
