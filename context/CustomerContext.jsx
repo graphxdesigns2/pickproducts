@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
 const CustomerContext = createContext(null);
 
@@ -7,15 +7,33 @@ export function CustomerProvider({ children }) {
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch("/api/customers/me", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        setCustomer(data.user || null);
-      })
-      .catch(() => setCustomer(null))
-      .finally(() => setLoading(false));
+  // Memoized fetch function so it can be called on mount and on demand
+  const fetchCustomer = useCallback(async () => {
+    try {
+      // Added cache: "no-store" and timestamp to bypass Next.js / browser fetch caching
+      const res = await fetch(`/api/customers/me?t=${Date.now()}`, {
+        credentials: "include",
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
+      const data = await res.json();
+      setCustomer(data.user || null);
+    } catch (err) {
+      setCustomer(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchCustomer();
+  }, [fetchCustomer]);
+
+  async function refreshCustomer() {
+    await fetchCustomer();
+  }
 
   async function login(email, password) {
     const res = await fetch("/api/customers/login", {
@@ -41,7 +59,6 @@ export function CustomerProvider({ children }) {
     });
     const data = await res.json();
     if (res.ok) {
-      // Auto-login after signup
       return login(email, password);
     }
     return { success: false, error: data.errors?.[0]?.message || "Signup failed" };
@@ -56,7 +73,17 @@ export function CustomerProvider({ children }) {
   }
 
   return (
-    <CustomerContext.Provider value={{ customer, loading, login, signup, logout }}>
+    <CustomerContext.Provider
+      value={{
+        customer,
+        loading,
+        login,
+        signup,
+        logout,
+        refreshCustomer, // Exported so components can trigger re-fetches
+        setCustomer,
+      }}
+    >
       {children}
     </CustomerContext.Provider>
   );

@@ -1,7 +1,8 @@
 'use client';
 
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import Link from 'next/link';
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCustomer } from '@/context/CustomerContext';
@@ -13,7 +14,7 @@ const NAV_STRUCTURE = [
     subItems: [
       { label: 'Personal Information', href: '/account#personal-info' },
       { label: 'Phone Number', href: '/account#phone' },
-      { label: 'Email Address', href: '/account#email' },
+      { label: 'Email Address', href: '/account#email-preferences' },
       { label: 'Shipping Address', href: '/account#shipping-address' },
     ],
   },
@@ -30,22 +31,28 @@ const NAV_STRUCTURE = [
     href: '/account/settings',
     subItems: [
       { label: 'Change Password', href: '/account/settings#change-password' },
-      { label: 'Email Preferences', href: '/account/settings#email-preferences' },
-      { label: 'Delete Account', href: '/account/settings#delete-account' },
     ],
   },
 ];
 
 export default function AccountLayout({ children }) {
-  const { customer, loading, logout } = useCustomer();
+  const { customer, loading, logout, refreshCustomer } = useCustomer();
   const pathname = usePathname();
   const router = useRouter();
 
+  // Redirect to login if unauthenticated
   useEffect(() => {
     if (!loading && !customer) {
       router.push('/login');
     }
   }, [loading, customer, router]);
+
+  // Re-fetch customer context when changing routes
+  useEffect(() => {
+    if (customer && refreshCustomer) {
+      refreshCustomer();
+    }
+  }, [pathname]);
 
   async function handleLogout(e) {
     e.preventDefault();
@@ -82,21 +89,30 @@ export default function AccountLayout({ children }) {
           </div>
           <nav className="account-nav">
             {NAV_STRUCTURE.map((tab) => {
-              const isActive = pathname === tab.href;
+              const isActive =
+                tab.href === '/account'
+                  ? pathname === '/account'
+                  : pathname.startsWith(tab.href);
+
               return (
                 <div className="nav-group" key={tab.href}>
-                  <a
+                  <Link
                     href={tab.href}
                     className={`nav-tab${isActive ? ' active' : ''}`}
+                    aria-current={isActive ? 'page' : undefined}
                   >
                     {tab.label}
-                  </a>
+                  </Link>
                   {isActive && tab.subItems.length > 0 && (
                     <div className="nav-subitems">
                       {tab.subItems.map((sub) => (
-                        <a href={sub.href} className="nav-subitem" key={sub.href}>
+                        <Link
+                          href={sub.href}
+                          className="nav-subitem"
+                          key={sub.href}
+                        >
                           {sub.label}
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -109,7 +125,10 @@ export default function AccountLayout({ children }) {
           </nav>
         </aside>
 
-        <main className="account-content">{children}</main>
+        {/* key={pathname} forces children components to remount fresh on route change */}
+        <main className="account-content" key={pathname}>
+          {children}
+        </main>
       </div>
       <Footer />
     </>
