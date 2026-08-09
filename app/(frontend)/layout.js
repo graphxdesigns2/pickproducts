@@ -2,6 +2,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { CustomerProvider } from "@/context/CustomerContext";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 import PayPalProvider from "@/components/PayPalProvider";
 
 export const metadata = {
@@ -20,13 +21,15 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <PayPalProvider>
-          <ToastProvider>
-            <CustomerProvider>
-              <CartProvider>{children}</CartProvider>
-            </CustomerProvider>
-          </ToastProvider>
-        </PayPalProvider>
+        <CurrencyProvider>
+          <PayPalProvider>
+            <ToastProvider>
+              <CustomerProvider>
+                <CartProvider>{children}</CartProvider>
+              </CustomerProvider>
+            </ToastProvider>
+          </PayPalProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );

@@ -1,21 +1,28 @@
+"use client";
+import { useCurrency } from "@/context/CurrencyContext";
+
 export default function ProductCard({ product, onOpen, onQuickAdd }) {
+  const { currency, formatDisplayPrice } = useCurrency();
   const p = product;
+
   return (
     <div className="card" onClick={() => onOpen(p.id)}>
       <div className="card-media">
         {p.image?.url ? (
-  <img src={p.image.url} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-) : (
-  p.icon
-)}
+          <img src={p.image.url} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          p.icon
+        )}
         {p.was ? <div className="badge">SALE</div> : null}
       </div>
       <div className="card-body">
         <div className="card-title">{p.name}</div>
-		<div className="card-cat">{p.cat?.name}</div>
+        <div className="card-cat">{p.cat?.name}</div>
         <div className="card-foot">
           <div className="card-price">
-            {p.was ? <span className="was">${p.was.toFixed(2)}</span> : null}${p.price.toFixed(2)}
+            {p.was ? <span className="was">{formatDisplayPrice(p.was)}</span> : null}
+            {" "}{formatDisplayPrice(p.price)}
+            {currency !== "USD" && <span className="currency-note" style={{ fontSize: "0.75rem", opacity: 0.8, marginLeft: "4px" }}>({currency})</span>}
           </div>
           <button
             className="add-btn"
