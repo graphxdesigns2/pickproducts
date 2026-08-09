@@ -132,7 +132,7 @@ export default function AccountOverviewPage() {
               type="tel"
               id="phone"
               name="phone"
-              placeholder="(123) 456-7890"
+              placeholder="(XXX) XXX-XXXX"
               value={formData.phone}
               onChange={handleChange}
             />
@@ -140,24 +140,20 @@ export default function AccountOverviewPage() {
         </section>
 
         {/* Email Address */}
-        <section id="email" className="account-card" style={{ marginBottom: '2rem' }}>
+        <section id="email-address" className="account-card" style={{ marginBottom: '2rem' }}>
           <div className="card-header">
             <h2>Email Address</h2>
-            <p>Your primary email address associated with this account.</p>
+            <p>Your primary email address associated with this account can <strong>not</strong> be changed.</p>
           </div>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="account-email">Email Address</label>
             <input
               type="email"
-              id="email"
-              name="email"
-              value={formData.email}
+              id="account-email"
+              value={customer?.email || ''}
               disabled
-              style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
+              style={{ backgroundColor: 'var(--surface-alt)', cursor: 'not-allowed', opacity: 0.8 }}
             />
-            <small style={{ color: '#888', marginTop: '4px', display: 'block' }}>
-              Email address cannot be changed directly for security reasons.
-            </small>
           </div>
         </section>
 

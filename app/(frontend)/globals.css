@@ -141,6 +141,33 @@ nav.main-nav a:hover, nav.main-nav a:focus-visible{
 
 .header-actions{display:flex;align-items:center;gap:16px;flex-shrink:0;justify-self:end;}
 
+.password-input-wrap {
+  position: relative;
+}
+
+.password-input-wrap input {
+  width: 100%;
+  padding-right: 42px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #9aa3b5;
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle-btn:hover {
+  color: var(--text, #14151a);
+}
+
 .account-link-wrap {
   position: relative;
   display: inline-flex;
