@@ -1,21 +1,43 @@
 import { NextResponse } from "next/server";
-import { getProductById } from "@/lib/products";
+import { getPayload } from "payload";
+import config from "@payload-config";
 import { getCartTotals } from "@/lib/pricing";
 import { getAccessToken, PAYPAL_API } from "@/lib/paypal";
 
 export async function POST(request) {
   try {
     const { cartItems } = await request.json();
-    // cartItems from client: [{ id, qty }, ...] — price is NEVER trusted from here
 
-    // Rebuild cart with real prices from the product catalog
-    const cart = cartItems.map((item) => {
-      const product = getProductById(item.id);
-      if (!product) throw new Error(`Unknown product id: ${item.id}`);
-      return { price: product.price, qty: item.qty };
-    });
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      return NextResponse.json(
+        { error: "Cart items are required" },
+        { status: 400 }
+      );
+    }
+
+    const payloadCms = await getPayload({ config });
+
+    // Fetch live product data from Payload CMS to prevent price mismatch
+    const cart = await Promise.all(
+      cartItems.map(async (item) => {
+        const product = await payloadCms.findByID({
+          collection: "products",
+          id: item.id,
+        });
+
+        if (!product) {
+          throw new Error(`Unknown product id: ${item.id}`);
+        }
+
+        const price = Number(product.price) || 0;
+        const qty = Number(item.qty) || 1;
+
+        return { price, qty };
+      })
+    );
 
     const { total } = getCartTotals(cart);
+    const formattedTotal = total.toFixed(2);
 
     const accessToken = await getAccessToken();
 
@@ -31,7 +53,7 @@ export async function POST(request) {
           {
             amount: {
               currency_code: "USD",
-              value: total.toFixed(2),
+              value: formattedTotal,
             },
           },
         ],
@@ -46,7 +68,7 @@ export async function POST(request) {
     const order = await orderRes.json();
     return NextResponse.json({ id: order.id });
   } catch (error) {
-    console.error(error);
+    console.error("PayPal Order Creation Error:", error);
     return NextResponse.json(
       { error: "Failed to create order" },
       { status: 500 }
