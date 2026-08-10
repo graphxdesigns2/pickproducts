@@ -59,14 +59,16 @@ export default function CheckoutModal({ isOpen, onClose }) {
   }
 
   // --- Google Pay: no ready-made button component, so build one with the session hook ---
-  const {
-    isPending: gpayPending,
-    handleClick: gpayHandleClick,
-  } = useGooglePayOneTimePaymentSession({
-    createOrder,
-    onApprove: (data) => captureOrder(data.orderId),
-    onError,
-  });
+  const { isPending: gpayPending, handleClick: gpayHandleClick } = useGooglePayOneTimePaymentSession({
+  paymentRequest: {
+    countryCode: "US",
+    currencyCode: "USD",
+    total: { label: "PickMyProducts", amount: total.toFixed(2), type: "final" },
+  },
+  createOrder,
+  onApprove: (data) => captureOrder(data.orderId),
+  onError,
+});
 
   return (
     <div className={`modal-overlay${isOpen ? " open" : ""}`}>
