@@ -30,14 +30,21 @@ export default function CheckoutModal({ isOpen, onClose }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cartItems: cart.map((c) => ({ id: c.id || c.productId, qty: c.qty || c.quantity || 1 })),
+          cartItems: cart.map((c) => ({
+            id: c.id || c.productId,
+            qty: c.qty || c.quantity || 1,
+          })),
         }),
       });
+
       const data = await res.json();
-      if (!res.ok || !data.id) {
-        throw new Error(data.error || "Failed to create order");
+
+      if (!res.ok || (!data.id && !data.orderID)) {
+        throw new Error(data.error || data.details || "Failed to create order on server");
       }
-      return data.id;
+
+      // Return the string order ID directly
+      return data.id || data.orderID;
     } catch (err) {
       console.error("createOrder error:", err);
       showToast(`⚠️ ${err.message || "Failed to initiate payment."}`);
@@ -52,7 +59,9 @@ export default function CheckoutModal({ isOpen, onClose }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderID: data.orderID }),
       });
+
       const captureData = await res.json();
+
       if (res.ok && captureData.status === "COMPLETED") {
         placeOrder();
       } else {
@@ -66,7 +75,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
 
   function onError(err) {
     console.error("PayPal Error Details:", err);
-    showToast("⚠️ Something went wrong with the payment provider. Please check browser console.");
+    showToast("⚠️ Something went wrong with the payment provider. Check console for details.");
   }
 
   return (
@@ -111,6 +120,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
           ) : (
             <div style={{ marginTop: "16px" }}>
               <PayPalButtons
+                key={selectedPayment}
                 style={{ layout: "vertical", shape: "rect", label: "checkout" }}
                 createOrder={createOrder}
                 onApprove={captureOrder}
