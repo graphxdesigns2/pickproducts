@@ -10,6 +10,28 @@ import {
   useGooglePayOneTimePaymentSession,
 } from "@paypal/react-paypal-js/sdk-v6";
 
+// Isolated so the hook only initializes once this actually mounts (i.e. once selected)
+function GooglePayButton({ total, createOrder, captureOrder, onError }) {
+  const { isPending, handleClick, error } = useGooglePayOneTimePaymentSession({
+    paymentRequest: {
+      countryCode: "US",
+      currencyCode: "USD",
+      total: { label: "PickMyProducts", amount: total.toFixed(2), type: "final" },
+    },
+    createOrder,
+    onApprove: (data) => captureOrder(data.orderId),
+    onError,
+  });
+
+  if (error) return <div className="notice">Google Pay isn't available right now.</div>;
+
+  return (
+    <button className="place-order" disabled={isPending} onClick={handleClick}>
+      Pay with Google Pay — ${total.toFixed(2)}
+    </button>
+  );
+}
+
 export default function CheckoutModal({ isOpen, onClose }) {
   const { cart, clearCart } = useCart();
   const { showToast } = useToast();
@@ -24,21 +46,17 @@ export default function CheckoutModal({ isOpen, onClose }) {
     showToast("🎉 Order placed! Confirmation sent to your account.");
   }
 
-  // Shared order creation — same endpoint for every payment method
   async function createOrder() {
     const res = await fetch("/api/paypal/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        cartItems: cart.map((c) => ({ id: c.id, qty: c.qty })),
-      }),
+      body: JSON.stringify({ cartItems: cart.map((c) => ({ id: c.id, qty: c.qty })) }),
     });
     const data = await res.json();
     if (!data.id) throw new Error("No order ID returned");
-    return { orderId: data.id }; // v6 wants { orderId }, not a bare string
+    return { orderId: data.id };
   }
 
-  // Shared capture — same endpoint for every payment method
   async function captureOrder(orderId) {
     const res = await fetch("/api/paypal/capture-order", {
       method: "POST",
@@ -57,18 +75,6 @@ export default function CheckoutModal({ isOpen, onClose }) {
     console.error(err);
     showToast("⚠️ Something went wrong. Please try again.");
   }
-
-  // --- Google Pay: no ready-made button component, so build one with the session hook ---
-  const { isPending: gpayPending, handleClick: gpayHandleClick } = useGooglePayOneTimePaymentSession({
-  paymentRequest: {
-    countryCode: "US",
-    currencyCode: "USD",
-    total: { label: "PickMyProducts", amount: total.toFixed(2), type: "final" },
-  },
-  createOrder,
-  onApprove: (data) => captureOrder(data.orderId),
-  onError,
-});
 
   return (
     <div className={`modal-overlay${isOpen ? " open" : ""}`}>
@@ -105,7 +111,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
             </div>
           )}
 
-          {selectedPayment === "apple" && (
+          {selectedPayment === "apay" && (
             <div style={{ marginTop: "16px" }}>
               <ApplePayOneTimePaymentButton
                 paymentRequest={{
@@ -122,22 +128,10 @@ export default function CheckoutModal({ isOpen, onClose }) {
             </div>
           )}
 
-          {selectedPayment === "google" && (
+          {selectedPayment === "gpay" && (
             <div style={{ marginTop: "16px" }}>
-              <button
-                className="place-order"
-                disabled={gpayPending}
-                onClick={gpayHandleClick}
-              >
-                Pay with Google Pay — ${total.toFixed(2)}
-              </button>
+              <GooglePayButton total={total} createOrder={createOrder} captureOrder={captureOrder} onError={onError} />
             </div>
-          )}
-
-          {selectedPayment !== "paypal" && selectedPayment !== "apple" && selectedPayment !== "google" && (
-            <button className="place-order" onClick={placeOrder}>
-              Pay with {activeMethod?.label || "Express Payment"} — ${total.toFixed(2)}
-            </button>
           )}
         </div>
       </div>
