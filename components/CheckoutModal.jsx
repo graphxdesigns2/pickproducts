@@ -4,7 +4,11 @@ import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { getCartTotals } from "@/lib/pricing";
 import { PAYMENT_METHODS } from "@/components/PaymentIcons";
-import { PayPalButtons } from "@paypal/react-paypal-js";
+import {
+  PayPalOneTimePaymentButton,
+  ApplePayOneTimePaymentButton,
+  useGooglePayOneTimePaymentSession,
+} from "@paypal/react-paypal-js/sdk-v6";
 
 export default function CheckoutModal({ isOpen, onClose }) {
   const { cart, clearCart } = useCart();
@@ -20,41 +24,49 @@ export default function CheckoutModal({ isOpen, onClose }) {
     showToast("🎉 Order placed! Confirmation sent to your account.");
   }
 
-  function createOrder() {
-    return fetch("/api/paypal/create-order", {
+  // Shared order creation — same endpoint for every payment method
+  async function createOrder() {
+    const res = await fetch("/api/paypal/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         cartItems: cart.map((c) => ({ id: c.id, qty: c.qty })),
       }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.id) throw new Error("No order ID returned");
-        return data.id;
-      });
+    });
+    const data = await res.json();
+    if (!data.id) throw new Error("No order ID returned");
+    return { orderId: data.id }; // v6 wants { orderId }, not a bare string
   }
 
-  function onApprove(data) {
-    return fetch("/api/paypal/capture-order", {
+  // Shared capture — same endpoint for every payment method
+  async function captureOrder(orderId) {
+    const res = await fetch("/api/paypal/capture-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderID: data.orderID }),
-    })
-      .then((res) => res.json())
-      .then((captureData) => {
-        if (captureData.status === "COMPLETED") {
-          placeOrder();
-        } else {
-          showToast("⚠️ Payment could not be completed. Please try again.");
-        }
-      });
+      body: JSON.stringify({ orderID: orderId }),
+    });
+    const captureData = await res.json();
+    if (captureData.status === "COMPLETED") {
+      placeOrder();
+    } else {
+      showToast("⚠️ Payment could not be completed. Please try again.");
+    }
   }
 
   function onError(err) {
     console.error(err);
-    showToast("⚠️ Something went wrong with PayPal. Please try again.");
+    showToast("⚠️ Something went wrong. Please try again.");
   }
+
+  // --- Google Pay: no ready-made button component, so build one with the session hook ---
+  const {
+    isPending: gpayPending,
+    handleClick: gpayHandleClick,
+  } = useGooglePayOneTimePaymentSession({
+    createOrder,
+    onApprove: (data) => captureOrder(data.orderId),
+    onError,
+  });
 
   return (
     <div className={`modal-overlay${isOpen ? " open" : ""}`}>
@@ -80,16 +92,47 @@ export default function CheckoutModal({ isOpen, onClose }) {
             Payment details and shipping address will be safely provided directly through {activeMethod?.label || "your express provider"}.
           </div>
 
-          {selectedPayment === "paypal" ? (
+          {selectedPayment === "paypal" && (
             <div style={{ marginTop: "16px" }}>
-              <PayPalButtons
-                style={{ layout: "vertical" }}
+              <PayPalOneTimePaymentButton
                 createOrder={createOrder}
-                onApprove={onApprove}
+                onApprove={(data) => captureOrder(data.orderId)}
                 onError={onError}
+                presentationMode="auto"
               />
             </div>
-          ) : (
+          )}
+
+          {selectedPayment === "apple" && (
+            <div style={{ marginTop: "16px" }}>
+              <ApplePayOneTimePaymentButton
+                paymentRequest={{
+                  countryCode: "US",
+                  currencyCode: "USD",
+                  total: { label: "PickMyProducts", amount: total.toFixed(2), type: "final" },
+                }}
+                applePaySessionVersion={4}
+                createOrder={createOrder}
+                onApprove={(data) => captureOrder(data.orderId)}
+                onError={onError}
+                buttonstyle="black"
+              />
+            </div>
+          )}
+
+          {selectedPayment === "google" && (
+            <div style={{ marginTop: "16px" }}>
+              <button
+                className="place-order"
+                disabled={gpayPending}
+                onClick={gpayHandleClick}
+              >
+                Pay with Google Pay — ${total.toFixed(2)}
+              </button>
+            </div>
+          )}
+
+          {selectedPayment !== "paypal" && selectedPayment !== "apple" && selectedPayment !== "google" && (
             <button className="place-order" onClick={placeOrder}>
               Pay with {activeMethod?.label || "Express Payment"} — ${total.toFixed(2)}
             </button>

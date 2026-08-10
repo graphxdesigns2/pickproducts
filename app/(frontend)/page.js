@@ -41,7 +41,7 @@ function scrollToId(id) {
 }
 
 export default function Home() {
-  const { addToCart } = useCart();
+  const { cart, addToCart } = useCart();
   const { showToast } = useToast();
 
   const [products, setProducts] = useState([]);
@@ -52,46 +52,54 @@ export default function Home() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [productModalId, setProductModalId] = useState(null);
 
-useEffect(() => {
-  fetch("/api/products?limit=100&depth=1")
-    .then((res) => res.json())
-    .then((data) => setProducts(data.docs || []))
-    .catch((err) => console.error("Failed to load products:", err));
-}, []);
+  const cartCount = cart ? cart.reduce((sum, item) => sum + (item.qty || 1), 0) : 0;
+
+  useEffect(() => {
+    fetch("/api/products?limit=100&depth=1")
+      .then((res) => res.json())
+      .then((data) => setProducts(data.docs || []))
+      .catch((err) => console.error("Failed to load products:", err));
+  }, []);
 
   function getProductById(id) {
     return products.find((p) => p.id === id);
   }
 
-const filteredProducts = useMemo(() => {
-  const q = search.trim().toLowerCase();
-  let items = products.filter(p => p.trending);
-  items = items.filter(p => activeCategory === "All" || p.cat?.name === activeCategory);
-  if (q) items = items.filter(p => p.name.toLowerCase().includes(q) || p.cat?.name?.toLowerCase().includes(q));
-  return items;
-}, [search, activeCategory, products]);
+  const filteredProducts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    let items = products.filter((p) => p.trending);
+    items = items.filter(
+      (p) => activeCategory === "All" || p.cat?.name === activeCategory
+    );
+    if (q)
+      items = items.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.cat?.name?.toLowerCase().includes(q)
+      );
+    return items;
+  }, [search, activeCategory, products]);
 
-function quickAdd(id) {
-  const p = getProductById(id);
-  if (!p) return;
+  function quickAdd(id) {
+    const p = getProductById(id);
+    if (!p) return;
 
-  // Extract the image URL from Payload CMS structure
-  const imageUrl =
-    p.image?.url ||
-    p.images?.[0]?.image?.url ||
-    p.images?.[0]?.url ||
-    p.featuredImage?.url ||
-    (typeof p.image === "string" ? p.image : null);
+    const imageUrl =
+      p.image?.url ||
+      p.images?.[0]?.image?.url ||
+      p.images?.[0]?.url ||
+      p.featuredImage?.url ||
+      (typeof p.image === "string" ? p.image : null);
 
-  const productToCart = {
-    ...p,
-    name: p.name || p.title,
-    image: imageUrl, // Guarantees a valid image URL string is attached
-  };
+    const productToCart = {
+      ...p,
+      name: p.name || p.title,
+      image: imageUrl,
+    };
 
-  addToCart(productToCart, p.sizes ? p.sizes[0] : null, 1);
-  showToast(`Added ${p.name || p.title} to cart`);
-}
+    addToCart(productToCart, p.sizes ? p.sizes[0] : null, 1);
+    showToast(`Added ${p.name || p.title} to cart`);
+  }
 
   function openCart() {
     setCartOpen(true);
@@ -111,11 +119,13 @@ function quickAdd(id) {
   return (
     <>
       <div className="utility-bar">
-	  <span className="dot"></span>
-        <span>Free shipping over $50</span><span className="dot"></span>
-        <span>24 hour responses</span><span className="dot"></span>
+        <span className="dot"></span>
+        <span>Free shipping over $50</span>
+        <span className="dot"></span>
+        <span>24 hour responses</span>
+        <span className="dot"></span>
         <span>Secure checkout with Paypal / Google Pay / Apple Pay</span>
-		<span className="dot"></span>
+        <span className="dot"></span>
       </div>
 
       <Header
@@ -123,11 +133,16 @@ function quickAdd(id) {
         onSearchChange={setSearch}
         onOpenCart={openCart}
         onScrollToId={scrollToId}
+        cartCount={cartCount}
+        cart={cart}
       />
 
       <Hero onSmoothScrollTo={smoothScrollTo} />
-	  <Carousel onOpen={setProductModalId} />
-      <CategoryRail activeCategory={activeCategory} onSelect={setActiveCategory} />
+      <Carousel onOpen={setProductModalId} />
+      <CategoryRail
+        activeCategory={activeCategory}
+        onSelect={setActiveCategory}
+      />
 
       <main className="section" id="shop">
         <div className="section-head">
@@ -160,10 +175,7 @@ function quickAdd(id) {
         onClose={closeAll}
       />
 
-      <CheckoutModal
-        isOpen={checkoutOpen}
-        onClose={closeAll}
-      />
+      <CheckoutModal isOpen={checkoutOpen} onClose={closeAll} />
     </>
   );
 }

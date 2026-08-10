@@ -1,4 +1,5 @@
 import "./globals.css";
+import Script from "next/script";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { CustomerProvider } from "@/context/CustomerContext";
@@ -21,6 +22,10 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
+        <Script
+          src="https://pay.google.com/gp/p/js/pay.js"
+          strategy="beforeInteractive"
+        />
         <CurrencyProvider>
           <PayPalProvider>
             <ToastProvider>
