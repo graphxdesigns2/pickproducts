@@ -65,8 +65,8 @@ export default function CheckoutModal({ isOpen, onClose }) {
   }
 
   function onError(err) {
-    console.error("PayPal Provider Error:", err);
-    showToast("⚠️ Something went wrong with the payment provider. Please try again.");
+    console.error("PayPal Error Details:", err);
+    showToast("⚠️ Something went wrong with the payment provider. Please check browser console.");
   }
 
   return (
@@ -109,42 +109,14 @@ export default function CheckoutModal({ isOpen, onClose }) {
           {itemCount === 0 ? (
             <div className="notice">Your cart is empty.</div>
           ) : (
-            <>
-              {selectedPayment === "paypal" && (
-                <div style={{ marginTop: "16px" }}>
-                  <PayPalButtons
-                    style={{ layout: "vertical", shape: "rect" }}
-                    createOrder={createOrder}
-                    onApprove={captureOrder}
-                    onError={onError}
-                  />
-                </div>
-              )}
-
-              {selectedPayment === "apay" && (
-                <div style={{ marginTop: "16px" }}>
-                  <PayPalButtons
-                    fundingSource="applepay"
-                    style={{ layout: "vertical" }}
-                    createOrder={createOrder}
-                    onApprove={captureOrder}
-                    onError={onError}
-                  />
-                </div>
-              )}
-
-              {selectedPayment === "gpay" && (
-                <div style={{ marginTop: "16px" }}>
-                  <PayPalButtons
-                    fundingSource="paylater"
-                    style={{ layout: "vertical" }}
-                    createOrder={createOrder}
-                    onApprove={captureOrder}
-                    onError={onError}
-                  />
-                </div>
-              )}
-            </>
+            <div style={{ marginTop: "16px" }}>
+              <PayPalButtons
+                style={{ layout: "vertical", shape: "rect", label: "checkout" }}
+                createOrder={createOrder}
+                onApprove={captureOrder}
+                onError={onError}
+              />
+            </div>
           )}
         </div>
       </div>
