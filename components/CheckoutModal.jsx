@@ -1,16 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { getCartTotals } from "@/lib/pricing";
 import { PAYMENT_METHODS } from "@/components/PaymentIcons";
-import { PayPalButtons } from "@paypal/react-paypal-js";
+import { PayPalButtons, FUNDING, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+
+// Maps our UI ids to the PayPal SDK's funding source constants
+const FUNDING_SOURCE_MAP = {
+  paypal: FUNDING.PAYPAL,
+  gpay: FUNDING.GOOGLEPAY,
+  apay: FUNDING.APPLEPAY,
+};
 
 export default function CheckoutModal({ isOpen, onClose }) {
   const { cart, clearCart } = useCart();
   const { showToast } = useToast();
   const [selectedPayment, setSelectedPayment] = useState("paypal");
+  const [{ isResolved }] = usePayPalScriptReducer();
+  const [ineligible, setIneligible] = useState(false);
+
+  const fundingSource = FUNDING_SOURCE_MAP[selectedPayment] || FUNDING.PAYPAL;
+
+  // Apple Pay / Google Pay only render when the SDK has loaded AND the
+  // buyer's browser/device actually supports that wallet (e.g. Apple Pay
+  // needs Safari on an Apple device with a card in Wallet). We check
+  // eligibility so we can show a clear fallback instead of a blank button.
+  useEffect(() => {
+    setIneligible(false);
+    if (!isResolved || typeof window === "undefined" || !window.paypal) return;
+    if (selectedPayment === "paypal") return; // always eligible
+    const eligible =
+      typeof window.paypal.isFundingEligible === "function"
+        ? window.paypal.isFundingEligible(fundingSource)
+        : true;
+    setIneligible(!eligible);
+  }, [isResolved, selectedPayment, fundingSource]);
 
   if (!isOpen) return null;
 
@@ -117,10 +143,18 @@ export default function CheckoutModal({ isOpen, onClose }) {
 
           {itemCount === 0 ? (
             <div className="notice">Your cart is empty.</div>
+          ) : ineligible ? (
+            <div className="notice" style={{ marginTop: "16px" }}>
+              {activeMethod?.label || "This payment method"} isn't available in this
+              browser or on this device. Try PayPal instead, or open this page on a
+              device/browser that supports it (e.g. Safari on an Apple device for
+              Apple Pay, Chrome with a saved card for Google Pay).
+            </div>
           ) : (
             <div style={{ marginTop: "16px" }}>
               <PayPalButtons
                 key={selectedPayment}
+                fundingSource={fundingSource}
                 style={{ layout: "vertical", shape: "rect", label: "checkout" }}
                 createOrder={createOrder}
                 onApprove={captureOrder}
