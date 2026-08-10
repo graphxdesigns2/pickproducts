@@ -14,6 +14,13 @@ const FUNDING_SOURCE_MAP = {
   apay: FUNDING.APPLEPAY,
 };
 
+// Style objects per funding source. The generic PayPal button accepts a
+// "label" (e.g. "checkout"), but wallet buttons (Apple Pay / Google Pay)
+// ignore that and render their own native branded button as long as we
+// don't pass conflicting style options.
+const PAYPAL_STYLE = { layout: "vertical", shape: "rect", label: "checkout" };
+const WALLET_STYLE = { layout: "vertical", shape: "rect", height: 45 };
+
 export default function CheckoutModal({ isOpen, onClose }) {
   const { cart, clearCart } = useCart();
   const { showToast } = useToast();
@@ -22,11 +29,14 @@ export default function CheckoutModal({ isOpen, onClose }) {
   const [ineligible, setIneligible] = useState(false);
 
   const fundingSource = FUNDING_SOURCE_MAP[selectedPayment] || FUNDING.PAYPAL;
+  const buttonStyle = selectedPayment === "paypal" ? PAYPAL_STYLE : WALLET_STYLE;
 
-  // Apple Pay / Google Pay only render when the SDK has loaded AND the
-  // buyer's browser/device actually supports that wallet (e.g. Apple Pay
-  // needs Safari on an Apple device with a card in Wallet). We check
-  // eligibility so we can show a clear fallback instead of a blank button.
+  // Apple Pay / Google Pay only render when the SDK has loaded AND PayPal
+  // reports the buyer's browser/device as eligible. Since iOS 18, Apple Pay
+  // can work on non-Safari browsers (including Windows Chrome) via a
+  // "scan with iPhone" handoff — so eligibility genuinely depends on the
+  // SDK's own detection, not just OS/browser. We don't hard-code platform
+  // rules here; we trust this check and show a fallback only when it says no.
   useEffect(() => {
     setIneligible(false);
     if (!isResolved || typeof window === "undefined" || !window.paypal) return;
@@ -37,6 +47,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
         : true;
     setIneligible(!eligible);
   }, [isResolved, selectedPayment, fundingSource]);
+
 
   if (!isOpen) return null;
 
@@ -146,16 +157,14 @@ export default function CheckoutModal({ isOpen, onClose }) {
           ) : ineligible ? (
             <div className="notice" style={{ marginTop: "16px" }}>
               {activeMethod?.label || "This payment method"} isn't available in this
-              browser or on this device. Try PayPal instead, or open this page on a
-              device/browser that supports it (e.g. Safari on an Apple device for
-              Apple Pay, Chrome with a saved card for Google Pay).
+              browser right now. Try PayPal instead, or a different browser/device.
             </div>
           ) : (
             <div style={{ marginTop: "16px" }}>
               <PayPalButtons
                 key={selectedPayment}
                 fundingSource={fundingSource}
-                style={{ layout: "vertical", shape: "rect", label: "checkout" }}
+                style={buttonStyle}
                 createOrder={createOrder}
                 onApprove={captureOrder}
                 onError={onError}
