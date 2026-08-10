@@ -104,11 +104,13 @@ export default function Home() {
   function openCart() {
     setCartOpen(true);
   }
+  
   function closeAll() {
     setCartOpen(false);
     setProductModalId(null);
     setCheckoutOpen(false);
   }
+  
   function openCheckout() {
     setCartOpen(false);
     setCheckoutOpen(true);

@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { getPayload } from "payload";
-import config from "@payload-config";
+import configPromise from "@payload-config";
 import { getCartTotals } from "@/lib/pricing";
 import { getAccessToken, PAYPAL_API } from "@/lib/paypal";
 
 export async function POST(request) {
   try {
-    const { cartItems } = await request.json();
+    const body = await request.json();
+    const cartItems = body.cartItems || body.items;
 
     if (!Array.isArray(cartItems) || cartItems.length === 0) {
       return NextResponse.json(
@@ -15,29 +16,37 @@ export async function POST(request) {
       );
     }
 
+    // Await configPromise for Payload 3.0+ App Router compatibility
+    const config = await configPromise;
     const payloadCms = await getPayload({ config });
 
     // Fetch live product data from Payload CMS to prevent price mismatch
     const cart = await Promise.all(
       cartItems.map(async (item) => {
+        const productId = item.id || item.productId;
+        if (!productId) {
+          throw new Error("Missing product ID in cart item");
+        }
+
         const product = await payloadCms.findByID({
           collection: "products",
-          id: item.id,
+          id: productId,
         });
 
         if (!product) {
-          throw new Error(`Unknown product id: ${item.id}`);
+          throw new Error(`Unknown product id: ${productId}`);
         }
 
         const price = Number(product.price) || 0;
-        const qty = Number(item.qty) || 1;
+        // Check for both 'qty' and 'quantity' to avoid defaulting to 1 incorrectly
+        const qty = Number(item.qty ?? item.quantity) || 1;
 
         return { price, qty };
       })
     );
 
     const { total } = getCartTotals(cart);
-    const formattedTotal = total.toFixed(2);
+    const formattedTotal = Number(total).toFixed(2);
 
     const accessToken = await getAccessToken();
 
@@ -61,8 +70,9 @@ export async function POST(request) {
     });
 
     if (!orderRes.ok) {
-      const err = await orderRes.text();
-      throw new Error(`PayPal order creation failed: ${err}`);
+      const errText = await orderRes.text();
+      console.error("PayPal API Error Response:", errText);
+      throw new Error(`PayPal API responded with status ${orderRes.status}`);
     }
 
     const order = await orderRes.json();
@@ -70,7 +80,7 @@ export async function POST(request) {
   } catch (error) {
     console.error("PayPal Order Creation Error:", error);
     return NextResponse.json(
-      { error: "Failed to create order" },
+      { error: error.message || "Failed to create order" },
       { status: 500 }
     );
   }

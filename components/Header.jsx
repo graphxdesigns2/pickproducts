@@ -1,9 +1,11 @@
-"use client";
+'use client';
+
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useCustomer } from "@/context/CustomerContext";
+import CurrencySelector from "@/components/CurrencySelector";
 
 export default function Header({ search, onSearchChange, onOpenCart, onScrollToId, cartCount: propCartCount }) {
   const { cart, cartCount: contextCartCount } = useCart() || {};
@@ -52,6 +54,9 @@ export default function Header({ search, onSearchChange, onOpenCart, onScrollToI
           </svg>
         </div>
         <div className="header-actions">
+          {/* Currency Switcher Dropdown */}
+          <CurrencySelector />
+
           <div className="account-link-wrap">
             <Link
               href={customer ? "/account" : "/login"}

@@ -3,10 +3,14 @@ import { getAccessToken, PAYPAL_API } from "@/lib/paypal";
 
 export async function POST(request) {
   try {
-    const { orderID } = await request.json();
+    const body = await request.json();
+    const orderID = body.orderID || body.orderId;
 
     if (!orderID) {
-      return NextResponse.json({ error: "Missing orderID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing orderID in request body" },
+        { status: 400 }
+      );
     }
 
     const accessToken = await getAccessToken();
@@ -22,19 +26,27 @@ export async function POST(request) {
       }
     );
 
-    if (!captureRes.ok) {
-      const err = await captureRes.text();
-      throw new Error(`PayPal capture failed: ${err}`);
-    }
-
     const captureData = await captureRes.json();
 
-    // captureData.status should be "COMPLETED" if successful
-    return NextResponse.json(captureData);
+    if (!captureRes.ok) {
+      console.error("PayPal Capture API Failure Response:", captureData);
+      const errorMessage =
+        captureData?.details?.[0]?.description ||
+        captureData?.message ||
+        `PayPal capture failed with status ${captureRes.status}`;
+
+      return NextResponse.json(
+        { error: errorMessage, details: captureData },
+        { status: captureRes.status }
+      );
+    }
+
+    // Returns full capture payload (containing status: "COMPLETED")
+    return NextResponse.json(captureData, { status: 200 });
   } catch (error) {
-    console.error(error);
+    console.error("PayPal Capture Error:", error);
     return NextResponse.json(
-      { error: "Failed to capture order" },
+      { error: error.message || "Failed to capture order" },
       { status: 500 }
     );
   }
