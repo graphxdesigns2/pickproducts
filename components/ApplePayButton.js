@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function ApplePayButton({ total, createOrder, captureOrder, onError }) {
   const [isEligible, setIsEligible] = useState(false);
@@ -10,11 +10,7 @@ export default function ApplePayButton({ total, createOrder, captureOrder, onErr
     let cancelled = false;
 
     async function setupApplePay() {
-      if (!window.ApplePaySession || !ApplePaySession.canMakePayments()) {
-        setStatus("ineligible");
-        return;
-      }
-
+      // Poll until the PayPal SDK loaded the Applepay component
       const ready = await waitFor(() => window.paypal?.Applepay);
       if (!ready || cancelled) {
         setStatus("ineligible");
@@ -23,6 +19,8 @@ export default function ApplePayButton({ total, createOrder, captureOrder, onErr
 
       try {
         const applePayConfig = await window.paypal.Applepay().config();
+
+        // Check if PayPal deems this buyer/device/domain eligible for Apple Pay
         if (applePayConfig.isEligible && !cancelled) {
           setIsEligible(true);
           setStatus("ready");
@@ -61,7 +59,10 @@ export default function ApplePayButton({ total, createOrder, captureOrder, onErr
         },
       };
 
-      const session = new window.ApplePaySession(4, paymentRequest);
+      // Check if native ApplePaySession exists (Safari), otherwise fallback to PayPal's session handler
+      const session = window.ApplePaySession
+        ? new window.ApplePaySession(4, paymentRequest)
+        : await applepay.createSession(paymentRequest);
 
       session.onvalidatemerchant = async (event) => {
         try {
@@ -88,13 +89,19 @@ export default function ApplePayButton({ total, createOrder, captureOrder, onErr
 
           if (confirmResponse.status === "APPROVED") {
             await captureOrder({ orderID: orderId });
-            session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
+            session.completePayment(
+              window.ApplePaySession?.STATUS_SUCCESS || "SUCCESS"
+            );
           } else {
-            session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+            session.completePayment(
+              window.ApplePaySession?.STATUS_FAILURE || "FAILURE"
+            );
           }
         } catch (err) {
           console.error("Apple Pay payment authorization error:", err);
-          session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+          session.completePayment(
+            window.ApplePaySession?.STATUS_FAILURE || "FAILURE"
+          );
           onError?.(err);
         }
       };
@@ -109,7 +116,7 @@ export default function ApplePayButton({ total, createOrder, captureOrder, onErr
   if (status === "ineligible" || !isEligible) {
     return (
       <div className="notice" style={{ marginTop: "16px" }}>
-        Apple Pay is only available on supported Apple devices using Safari.
+        Apple Pay isn't available on this browser or device right now — try PayPal or Google Pay instead.
       </div>
     );
   }
@@ -133,8 +140,12 @@ export default function ApplePayButton({ total, createOrder, captureOrder, onErr
         color: "white",
         borderRadius: "4px",
         fontSize: "16px",
+        fontWeight: "600",
         cursor: "pointer",
         border: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
        Pay
