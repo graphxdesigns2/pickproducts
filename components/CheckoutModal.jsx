@@ -7,6 +7,7 @@ import { getCartTotals } from "@/lib/pricing";
 import { PAYMENT_METHODS } from "@/components/PaymentIcons";
 import { PayPalButtons, FUNDING } from "@paypal/react-paypal-js";
 import GooglePayButton from "@/components/GooglePayButton";
+import ApplePayButton from "@/components/ApplePayButton";
 
 const PAYPAL_STYLE = { layout: "vertical", shape: "rect", label: "checkout" };
 
@@ -128,11 +129,12 @@ export default function CheckoutModal({ isOpen, onClose }) {
               onError={onError}
             />
           ) : selectedPayment === "apay" ? (
-            <div className="notice" style={{ marginTop: "16px" }}>
-              Apple Pay integration is still being built out (it needs its own
-              dedicated setup, similar to Google Pay). Use PayPal or Google Pay
-              for now — Apple Pay is coming next.
-            </div>
+            <ApplePayButton
+              total={total}
+              createOrder={createOrder}
+              captureOrder={captureOrder}
+              onError={onError}
+            />
           ) : (
             <div style={{ marginTop: "16px" }}>
               <PayPalButtons

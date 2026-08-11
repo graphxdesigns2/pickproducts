@@ -7,7 +7,8 @@ export default function PayPalProvider({ children }) {
     clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
     currency: "USD",
     intent: "capture",
-    "disable-funding": "card", // Removes the Debit or Credit Card button
+    components: "buttons,googlepay,applepay", // Ensure applepay component is loaded
+    "disable-funding": "card",
   };
 
   return (
