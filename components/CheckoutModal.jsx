@@ -1,53 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { getCartTotals } from "@/lib/pricing";
 import { PAYMENT_METHODS } from "@/components/PaymentIcons";
-import { PayPalButtons, FUNDING, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import { PayPalButtons, FUNDING } from "@paypal/react-paypal-js";
+import GooglePayButton from "@/components/GooglePayButton";
 
-// Maps our UI ids to the PayPal SDK's funding source constants
-const FUNDING_SOURCE_MAP = {
-  paypal: FUNDING.PAYPAL,
-  gpay: FUNDING.GOOGLEPAY,
-  apay: FUNDING.APPLEPAY,
-};
-
-// Style objects per funding source. The generic PayPal button accepts a
-// "label" (e.g. "checkout"), but wallet buttons (Apple Pay / Google Pay)
-// ignore that and render their own native branded button as long as we
-// don't pass conflicting style options.
 const PAYPAL_STYLE = { layout: "vertical", shape: "rect", label: "checkout" };
-const WALLET_STYLE = { layout: "vertical", shape: "rect", height: 45 };
 
 export default function CheckoutModal({ isOpen, onClose }) {
   const { cart, clearCart } = useCart();
   const { showToast } = useToast();
   const [selectedPayment, setSelectedPayment] = useState("paypal");
-  const [{ isResolved }] = usePayPalScriptReducer();
-  const [ineligible, setIneligible] = useState(false);
-
-  const fundingSource = FUNDING_SOURCE_MAP[selectedPayment] || FUNDING.PAYPAL;
-  const buttonStyle = selectedPayment === "paypal" ? PAYPAL_STYLE : WALLET_STYLE;
-
-  // Apple Pay / Google Pay only render when the SDK has loaded AND PayPal
-  // reports the buyer's browser/device as eligible. Since iOS 18, Apple Pay
-  // can work on non-Safari browsers (including Windows Chrome) via a
-  // "scan with iPhone" handoff — so eligibility genuinely depends on the
-  // SDK's own detection, not just OS/browser. We don't hard-code platform
-  // rules here; we trust this check and show a fallback only when it says no.
-  useEffect(() => {
-    setIneligible(false);
-    if (!isResolved || typeof window === "undefined" || !window.paypal) return;
-    if (selectedPayment === "paypal") return; // always eligible
-    const eligible =
-      typeof window.paypal.isFundingEligible === "function"
-        ? window.paypal.isFundingEligible(fundingSource)
-        : true;
-    setIneligible(!eligible);
-  }, [isResolved, selectedPayment, fundingSource]);
-
 
   if (!isOpen) return null;
 
@@ -154,17 +120,25 @@ export default function CheckoutModal({ isOpen, onClose }) {
 
           {itemCount === 0 ? (
             <div className="notice">Your cart is empty.</div>
-          ) : ineligible ? (
+          ) : selectedPayment === "gpay" ? (
+            <GooglePayButton
+              total={total}
+              createOrder={createOrder}
+              captureOrder={captureOrder}
+              onError={onError}
+            />
+          ) : selectedPayment === "apay" ? (
             <div className="notice" style={{ marginTop: "16px" }}>
-              {activeMethod?.label || "This payment method"} isn't available in this
-              browser right now. Try PayPal instead, or a different browser/device.
+              Apple Pay integration is still being built out (it needs its own
+              dedicated setup, similar to Google Pay). Use PayPal or Google Pay
+              for now — Apple Pay is coming next.
             </div>
           ) : (
             <div style={{ marginTop: "16px" }}>
               <PayPalButtons
                 key={selectedPayment}
-                fundingSource={fundingSource}
-                style={buttonStyle}
+                fundingSource={FUNDING.PAYPAL}
+                style={PAYPAL_STYLE}
                 createOrder={createOrder}
                 onApprove={captureOrder}
                 onError={onError}
