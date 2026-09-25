@@ -90,15 +90,25 @@ export async function POST(request: Request) {
         const originalWasPrice = parseFloat((finalPrice * 1.25).toFixed(2))
 
         // Check if item already exists in Payload by cjPid
-        const existing = await payload.find({
-          collection: 'products',
-          where: {
-            cjPid: {
-              equals: cjPid,
-            },
-          },
-          limit: 1,
-        })
+// Replace this block that fails on cj_pid:
+/*
+const existing = await payload.find({
+  collection: 'products',
+  where: { cjPid: { equals: cjPid } },
+  limit: 1,
+})
+*/
+
+// Temporarily change to search by name or create directly:
+const existing = await payload.find({
+  collection: 'products',
+  where: {
+    name: {
+      equals: title,
+    },
+  },
+  limit: 1,
+})
 
         const productData = {
           name: title,
