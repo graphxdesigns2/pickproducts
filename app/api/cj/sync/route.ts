@@ -56,7 +56,6 @@ export async function POST(request: Request) {
       )
     }
 
-    // Safely extract products array from CJ's nested response structure
     const cjProducts =
       cjData.data?.content?.[0]?.productList || cjData.data?.list || []
 
@@ -74,41 +73,29 @@ export async function POST(request: Request) {
       errors: [],
     }
 
-    // 3. Upsert into Payload PostgreSQL Database
+    // 3. Upsert into Payload PostgreSQL Database by cjPid
     for (const item of cjProducts) {
       try {
         const cjPid = item.id || item.pid || ''
         const title = item.nameEn || item.productNameEn || item.productName || 'CJ Product'
         
-        // Convert sellPrice/price safely
         const rawPriceStr = (item.sellPrice || item.price || '0').toString().split(' ')[0]
         const wholesaleCost = parseFloat(rawPriceStr) || 0
 
-        // Calculate retail price with 40% margin (Wholesale * 1.4)
+        // 40% margin markup calculation
         const retailPrice = parseFloat((wholesaleCost * 1.4).toFixed(2))
         const finalPrice = retailPrice > 0 ? retailPrice : 19.99
         const originalWasPrice = parseFloat((finalPrice * 1.25).toFixed(2))
 
-        // Check if item already exists in Payload by cjPid
-// Replace this block that fails on cj_pid:
-/*
-const existing = await payload.find({
-  collection: 'products',
-  where: { cjPid: { equals: cjPid } },
-  limit: 1,
-})
-*/
-
-// Temporarily change to search by name or create directly:
-const existing = await payload.find({
-  collection: 'products',
-  where: {
-    name: {
-      equals: title,
-    },
-  },
-  limit: 1,
-})
+        const existing = await payload.find({
+          collection: 'products',
+          where: {
+            cjPid: {
+              equals: cjPid,
+            },
+          },
+          limit: 1,
+        })
 
         const productData = {
           name: title,
