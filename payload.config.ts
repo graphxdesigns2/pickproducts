@@ -17,12 +17,12 @@ const dirname = path.dirname(filename);
 
 export default buildConfig({
   admin: {
-  user: Users.slug,
-  importMap: {
-    baseDir: path.resolve(dirname),
-    autoGenerate: true,
+    user: Users.slug,
+    importMap: {
+      baseDir: path.resolve(dirname),
+      autoGenerate: true,
+    },
   },
-},
   collections: [Users, Media, Products, Customers, Categories],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
@@ -33,15 +33,16 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || "",
     },
+    push: true, // Automatically updates PostgreSQL schema with new fields (cjPid, cjSku, etc.)
   }),
   sharp,
   plugins: [
-vercelBlobStorage({
-  enabled: true,
-  collections: {
-    media: true,
-  },
-  token: process.env.BLOB_PUBLIC_READ_WRITE_TOKEN,
-}),
+    vercelBlobStorage({
+      enabled: true,
+      collections: {
+        media: true,
+      },
+      token: process.env.BLOB_PUBLIC_READ_WRITE_TOKEN,
+    }),
   ],
 });
