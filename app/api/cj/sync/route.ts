@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
-import config from '../../../../payload-config'
+import config from '@payload-config'
 
 export async function POST(request: Request) {
   try {
@@ -70,16 +70,14 @@ export async function POST(request: Request) {
     // 3. Upsert into Payload PostgreSQL Database
     for (const item of cjProducts) {
       try {
-        // CJ items use 'id' for PID, 'nameEn' for Title, and 'bigImage' for Image URL
         const cjPid = item.id || item.pid
-        const rawPrice = (item.sellPrice || item.price || '0').split(' ')[0]
+        const rawPrice = (item.sellPrice || item.price || '0').toString().split(' ')[0]
         const wholesaleCost = parseFloat(rawPrice) || 0
 
-        // Calculate retail price with 40% margin (Wholesale * 1.4)
+        // Calculate retail price with 40% margin
         const retailPrice = parseFloat((wholesaleCost * 1.4).toFixed(2))
         const originalWasPrice = parseFloat((retailPrice * 1.25).toFixed(2))
 
-        // Check if item already exists in Payload
         const existing = await payload.find({
           collection: 'products',
           where: {
