@@ -60,24 +60,36 @@ export async function POST(request: Request) {
     const cjProducts =
       cjData.data?.content?.[0]?.productList || cjData.data?.list || []
 
-    const results = {
+    const results: {
+      totalFetched: number
+      created: number
+      updated: number
+      failed: number
+      errors: Array<{ pid: string; error: string; validationErrors?: any }>
+    } = {
       totalFetched: cjProducts.length,
       created: 0,
       updated: 0,
       failed: 0,
+      errors: [],
     }
 
     // 3. Upsert into Payload PostgreSQL Database
     for (const item of cjProducts) {
       try {
-        const cjPid = item.id || item.pid
-        const rawPrice = (item.sellPrice || item.price || '0').toString().split(' ')[0]
-        const wholesaleCost = parseFloat(rawPrice) || 0
+        const cjPid = item.id || item.pid || ''
+        const title = item.nameEn || item.productNameEn || item.productName || 'CJ Product'
+        
+        // Convert sellPrice/price safely
+        const rawPriceStr = (item.sellPrice || item.price || '0').toString().split(' ')[0]
+        const wholesaleCost = parseFloat(rawPriceStr) || 0
 
-        // Calculate retail price with 40% margin
+        // Calculate retail price with 40% margin (Wholesale * 1.4)
         const retailPrice = parseFloat((wholesaleCost * 1.4).toFixed(2))
-        const originalWasPrice = parseFloat((retailPrice * 1.25).toFixed(2))
+        const finalPrice = retailPrice > 0 ? retailPrice : 19.99
+        const originalWasPrice = parseFloat((finalPrice * 1.25).toFixed(2))
 
+        // Check if item already exists in Payload by cjPid
         const existing = await payload.find({
           collection: 'products',
           where: {
@@ -89,10 +101,10 @@ export async function POST(request: Request) {
         })
 
         const productData = {
-          name: item.nameEn || item.productNameEn || item.productName || 'CJ Product',
-          price: retailPrice > 0 ? retailPrice : 19.99,
+          name: title,
+          price: finalPrice,
           was: originalWasPrice,
-          desc: item.description || '',
+          desc: item.description || title,
           cjPid: cjPid,
           cjSku: item.sku || item.productSku || '',
           cjCostPrice: wholesaleCost,
@@ -113,15 +125,20 @@ export async function POST(request: Request) {
           })
           results.created++
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(`Error syncing CJ product ${item.id || item.pid}:`, err)
         results.failed++
+        results.errors.push({
+          pid: item.id || item.pid || 'unknown',
+          error: err?.message || String(err),
+          validationErrors: err?.data || err?.errors || null,
+        })
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Successfully synced CJ products with Payload database',
+      message: 'Processed CJ product sync',
       results,
     })
   } catch (error: any) {
@@ -131,4 +148,8 @@ export async function POST(request: Request) {
       { status: 500 },
     )
   }
+}
+
+export async function GET(request: Request) {
+  return POST(request)
 }
