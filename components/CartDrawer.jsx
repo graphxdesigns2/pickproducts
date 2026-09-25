@@ -26,6 +26,8 @@ export default function CartDrawer({ isOpen, onClose, onCheckout }) {
 
               // Helper function to resolve image URL from any common structure/key
               const getImageUrl = (item) => {
+                if (item.cjImage) return item.cjImage;
+
                 const img = item.image || item.icon || item.thumbnail || item.featuredImage;
                 if (!img) return null;
 

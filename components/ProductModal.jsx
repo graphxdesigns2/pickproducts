@@ -2,30 +2,45 @@
 import { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
+
 export default function ProductModal({ product, isOpen, onClose }) {
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const [size, setSize] = useState(null);
   const [qty, setQty] = useState(1);
+
   useEffect(() => {
     if (product) {
       setSize(product.sizes && product.sizes.length > 0 ? product.sizes[0].size : null);
       setQty(1);
     }
   }, [product]);
+
   if (!product) return null;
   const p = product;
+
+  // Resolve the image source: Payload upload -> CJ CDN direct URL -> fallback icon
+  const imageUrl = p.image?.url || p.cjImage;
+
   function handleAdd() {
     addToCart(p, size, qty);
     onClose();
     showToast(`Added ${qty} × ${p.name} to cart`);
   }
+
+  const currentPrice = typeof p.price === 'number' ? p.price : 0;
+  const wasPrice = typeof p.was === 'number' ? p.was : null;
+
   return (
     <div className={`modal-overlay${isOpen ? " open" : ""}`}>
       <div className="modal">
         <div className="modal-media">
-          {p.image?.url ? (
-            <img src={p.image.url} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          {imageUrl ? (
+            <img 
+              src={imageUrl} 
+              alt={p.name} 
+              style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+            />
           ) : (
             p.icon
           )}
@@ -35,7 +50,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
           <div className="cat">{p.cat?.name}</div>
           <h2>{p.name}</h2>
           <div className="modal-price">
-            {p.was ? <span className="was" style={{ fontSize: "14px" }}>${p.was.toFixed(2)} </span> : null}${p.price.toFixed(2)}
+            {wasPrice ? <span className="was" style={{ fontSize: "14px" }}>${wasPrice.toFixed(2)} </span> : null}${currentPrice.toFixed(2)}
           </div>
           <div className="desc">{p.desc}</div>
           {p.sizes && p.sizes.length > 0 && (
@@ -66,7 +81,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
             </div>
           </div>
           <button className="modal-add" onClick={handleAdd}>
-            Add {qty} to Cart — ${(p.price * qty).toFixed(2)}
+            Add {qty} to Cart — ${(currentPrice * qty).toFixed(2)}
           </button>
         </div>
       </div>

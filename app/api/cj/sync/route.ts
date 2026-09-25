@@ -82,7 +82,6 @@ export async function POST(request: Request) {
         const rawPriceStr = (item.sellPrice || item.price || '0').toString().split(' ')[0]
         const wholesaleCost = parseFloat(rawPriceStr) || 0
 
-        // 40% margin markup calculation
         const retailPrice = parseFloat((wholesaleCost * 1.4).toFixed(2))
         const finalPrice = retailPrice > 0 ? retailPrice : 19.99
         const originalWasPrice = parseFloat((finalPrice * 1.25).toFixed(2))
