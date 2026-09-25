@@ -37,19 +37,14 @@ export async function GET() {
 
     const accessToken = authData.data.accessToken;
 
-    // Request products from CJ
+    // Get products from CJ
     const productsResponse = await fetch(
-      "https://developers.cjdropshipping.com/api2.0/v1/product/listV2",
+      "https://developers.cjdropshipping.com/api2.0/v1/product/listV2?page=1&size=20",
       {
-        method: "POST",
+        method: "GET",
         headers: {
-          "Content-Type": "application/json",
           "CJ-Access-Token": accessToken,
         },
-        body: JSON.stringify({
-          pageNum: 1,
-          pageSize: 20,
-        }),
       }
     );
 
