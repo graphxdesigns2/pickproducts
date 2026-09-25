@@ -5,11 +5,11 @@ export const Products: CollectionConfig = {
 
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'cat', 'price', 'cjSku'],
+    defaultColumns: ['name', 'cat', 'price', 'cjPid'],
   },
 
   access: {
-    read: () => true,
+    read: () => true, // Publicly readable for your storefront
   },
 
   fields: [
@@ -18,7 +18,6 @@ export const Products: CollectionConfig = {
       type: 'text',
       required: true,
     },
-
     {
       name: 'cat',
       type: 'relationship',
@@ -26,39 +25,33 @@ export const Products: CollectionConfig = {
       required: false,
       label: 'Category',
     },
-
     {
       name: 'image',
       type: 'upload',
       relationTo: 'media',
     },
-
     {
       name: 'price',
       type: 'number',
       required: true,
     },
-
     {
       name: 'was',
       type: 'number',
       label: 'Original price (if on sale)',
     },
-
     {
       name: 'trending',
       type: 'checkbox',
       label: 'Show on homepage (Trending)',
       defaultValue: false,
     },
-
     {
       name: 'carousel',
       type: 'checkbox',
       label: 'Show on rotating product wheel',
       defaultValue: false,
     },
-
     {
       name: 'sizes',
       type: 'array',
@@ -69,29 +62,41 @@ export const Products: CollectionConfig = {
         },
       ],
     },
-
     {
       name: 'desc',
       type: 'textarea',
       label: 'Description',
     },
 
-    // CJ Dropshipping information
+    // --- CJ Dropshipping Integration Fields ---
     {
-      name: 'cjProductId',
+      name: 'cjPid',
       type: 'text',
-      label: 'CJ Product ID',
+      index: true,
+      label: 'CJ Product ID (PID)',
       admin: {
-        readOnly: true,
+        description: 'Unique product ID from CJ Dropshipping',
       },
     },
-
     {
       name: 'cjSku',
       type: 'text',
       label: 'CJ SKU',
+    },
+    {
+      name: 'cjCostPrice',
+      type: 'number',
+      label: 'CJ Wholesale Cost',
       admin: {
-        readOnly: true,
+        description: 'Original supplier price from CJ Dropshipping',
+      },
+    },
+    {
+      name: 'cjImage',
+      type: 'text',
+      label: 'CJ Image URL',
+      admin: {
+        description: 'Direct image CDN URL from CJ Dropshipping',
       },
     },
   ],
