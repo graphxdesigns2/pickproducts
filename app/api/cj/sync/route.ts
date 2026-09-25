@@ -56,7 +56,10 @@ export async function POST(request: Request) {
       )
     }
 
-    const cjProducts = cjData.data?.list || []
+    // Safely extract products array from CJ's nested response structure
+    const cjProducts =
+      cjData.data?.content?.[0]?.productList || cjData.data?.list || []
+
     const results = {
       totalFetched: cjProducts.length,
       created: 0,
@@ -67,10 +70,12 @@ export async function POST(request: Request) {
     // 3. Upsert into Payload PostgreSQL Database
     for (const item of cjProducts) {
       try {
-        const cjPid = item.pid
-        const wholesaleCost = parseFloat(item.sellPrice || item.price || '0')
-        
-        // Calculate retail price with a 40% margin (Wholesale * 1.4)
+        // CJ items use 'id' for PID, 'nameEn' for Title, and 'bigImage' for Image URL
+        const cjPid = item.id || item.pid
+        const rawPrice = (item.sellPrice || item.price || '0').split(' ')[0]
+        const wholesaleCost = parseFloat(rawPrice) || 0
+
+        // Calculate retail price with 40% margin (Wholesale * 1.4)
         const retailPrice = parseFloat((wholesaleCost * 1.4).toFixed(2))
         const originalWasPrice = parseFloat((retailPrice * 1.25).toFixed(2))
 
@@ -86,14 +91,14 @@ export async function POST(request: Request) {
         })
 
         const productData = {
-          name: item.productNameEn || item.productName || 'CJ Product',
+          name: item.nameEn || item.productNameEn || item.productName || 'CJ Product',
           price: retailPrice > 0 ? retailPrice : 19.99,
           was: originalWasPrice,
           desc: item.description || '',
           cjPid: cjPid,
-          cjSku: item.productSku || '',
+          cjSku: item.sku || item.productSku || '',
           cjCostPrice: wholesaleCost,
-          cjImage: item.productImage || '',
+          cjImage: item.bigImage || item.productImage || '',
         }
 
         if (existing.docs.length > 0) {
@@ -111,7 +116,7 @@ export async function POST(request: Request) {
           results.created++
         }
       } catch (err) {
-        console.error(`Error syncing CJ product ${item.pid}:`, err)
+        console.error(`Error syncing CJ product ${item.id || item.pid}:`, err)
         results.failed++
       }
     }
