@@ -34,9 +34,13 @@ export async function POST(request: Request) {
 
     const accessToken = authData.data.accessToken
 
-    // 2. Fetch products from CJ
+    // Support optional page query param (e.g. /api/cj/sync?page=2)
+    const { searchParams } = new URL(request.url)
+    const page = searchParams.get('page') || '1'
+
+    // 2. Fetch 100 products per page from CJ
     const cjRes = await fetch(
-      'https://developers.cjdropshipping.com/api2.0/v1/product/listV2?page=1&size=20',
+      `https://developers.cjdropshipping.com/api2.0/v1/product/listV2?page=${page}&size=100`,
       {
         method: 'GET',
         headers: {
@@ -82,6 +86,7 @@ export async function POST(request: Request) {
         const rawPriceStr = (item.sellPrice || item.price || '0').toString().split(' ')[0]
         const wholesaleCost = parseFloat(rawPriceStr) || 0
 
+        // 40% margin markup calculation
         const retailPrice = parseFloat((wholesaleCost * 1.4).toFixed(2))
         const finalPrice = retailPrice > 0 ? retailPrice : 19.99
         const originalWasPrice = parseFloat((finalPrice * 1.25).toFixed(2))
@@ -134,7 +139,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Processed CJ product sync',
+      message: `Processed CJ product sync (Page ${page})`,
       results,
     })
   } catch (error: any) {
